@@ -2,11 +2,12 @@ import { motion } from 'framer-motion'
 import { PixelScene } from '../components/PixelScene'
 import { PixelButton, PixelCard } from '../components/PixelUI'
 import { APP_VERSION } from '../config'
+import { getHomePeriodCopy } from '../lib/recommend'
 import type { Kind } from '../types'
 
 export function HomePage({ onPick, onNavigate }: { onPick: (kind: Kind) => void; onNavigate: (page: 'preferences' | 'history' | 'favorites' | 'dex') => void }) {
   return <main className="page home-page">
-    <div className="home-heading"><div className="eyebrow"><span className="dot" /> PIXEL CAFÉ · OPEN</div><h1>今日食运<span className="title-spark">✦</span></h1><p>今天别纠结啦，我帮你选。</p></div>
+    <div className="home-heading"><div className="eyebrow"><span className="dot" /> {getHomePeriodCopy()}</div><h1>今日食运<span className="title-spark">✦</span></h1><p>今天别纠结啦，我帮你选。</p></div>
     <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: .45 }} className="scene-wrap"><PixelScene /><div className="scene-caption">♡ 欢迎光临好运小食堂 ♡</div></motion.div>
     <div className="choice-label"><span>今天的冒险从这里开始</span><span>↘</span></div>
     <div className="choice-stack grid">

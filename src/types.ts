@@ -66,10 +66,10 @@ export interface SavedState {
   dislikedDrink: string[]
   favorites: string[]
   history: HistoryEntry[]
-  todayRejected: { id: string; day: string }[]
+  todayRejected: { id: string; day: string; kind?: Kind }[]
   lastShown: { id: string; timestamp: number }[]
   foodFilters: FoodFilters
   drinkFilters: DrinkFilters
 }
 
-export interface PickResult { item: Item; reason: string }
+export interface PickResult { item: Item; reason: string; hint: string }

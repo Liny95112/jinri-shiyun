@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { pickRecommendation } from './lib/recommend'
-import { dayKey, loadState, preferenceKeys, saveState } from './lib/storage'
+import { addTodayRejectedItem, cleanupExpiredTodayRejectedItems, loadState, preferenceKeys, saveState } from './lib/storage'
 import { HomePage } from './pages/HomePage'
 import { PickerPage } from './pages/PickerPage'
 import { RollingPage } from './pages/RollingPage'
@@ -28,12 +28,14 @@ export default function App() {
   const [dexQuery, setDexQuery] = useState('')
   const [dexFilter, setDexFilter] = useState('all')
   const [dexPool, setDexPool] = useState<Item[]>([])
+  const recentDraws = useRef<string[]>([])
 
   useEffect(() => saveState(state), [state])
   useEffect(() => { if (!toast) return; const id = window.setTimeout(() => setToast(''), 3200); return () => window.clearTimeout(id) }, [toast])
 
-  function goHome() { setScreen('home'); setResult(null); setAccepted(false) }
+  function goHome() { recentDraws.current = []; setScreen('home'); setResult(null); setAccepted(false) }
   function goBack() {
+    recentDraws.current = []
     if (screen === 'result') setScreen('picker')
     else if (screen === 'rolling') setScreen('picker')
     else if (screen === 'dex-result' || screen === 'dex-rolling') setScreen('dex')
@@ -41,18 +43,30 @@ export default function App() {
   }
 
   function openHomeSection(page: 'preferences' | 'history' | 'favorites' | 'dex') {
+    recentDraws.current = []
     if (page === 'dex') { setDexKind('food'); setDexQuery(''); setDexFilter('all') }
     setScreen(page)
   }
 
   function changeDexKind(next: Kind) { setDexKind(next); setDexQuery(''); setDexFilter('all') }
 
+  function rememberDraw(currentState: SavedState, item: Item, now: Date): SavedState {
+    recentDraws.current = [item.id, ...recentDraws.current.filter(id => id !== item.id)].slice(0, 5)
+    return { ...currentState, lastShown: [{ id: item.id, timestamp: now.getTime() }, ...currentState.lastShown.filter(entry => entry.id !== item.id)].slice(0, 100) }
+  }
+
   function startDexDraw(items: Item[], excludeId?: string) {
     if (!items.length) return
-    const choices = items.length > 1 ? items.filter(item => item.id !== excludeId) : items
-    const item = choices[Math.floor(Math.random() * choices.length)]
+    if (!excludeId) recentDraws.current = []
+    const now = new Date()
+    const currentState = cleanupExpiredTodayRejectedItems(state, now)
+    const options = { pool: items, excludeId, recentDraws: recentDraws.current, usePickerFilters: false, now }
+    let picked = pickRecommendation(items[0].kind, currentState, options)
+    if (!picked && excludeId) picked = pickRecommendation(items[0].kind, currentState, { ...options, excludeId: undefined })
+    if (!picked) { setState(currentState); setToast('当前条件下没有合适的选项，试试放宽筛选吧。'); return }
     setDexPool(items)
-    setResult({ item, reason: '从当前图鉴筛选结果中抽到的小惊喜。' })
+    setState(rememberDraw(currentState, picked.item, now))
+    setResult(picked)
     setAccepted(false)
     setRollId(id => id + 1)
     setScreen('dex-rolling')
@@ -64,12 +78,15 @@ export default function App() {
   }
 
   function startRoll(chosenKind = kind, currentState = state, excludeId?: string) {
-    let picked = pickRecommendation(chosenKind, currentState, excludeId)
+    if (!excludeId) recentDraws.current = []
+    const now = new Date()
+    const cleanedState = cleanupExpiredTodayRejectedItems(currentState, now)
+    const options = { excludeId, recentDraws: recentDraws.current, now }
+    let picked = pickRecommendation(chosenKind, cleanedState, options)
     // A tiny catalog can be exhausted by repeat requests; allow the previous result again as a last resort.
-    if (!picked && excludeId) picked = pickRecommendation(chosenKind, currentState)
-    if (!picked) { setState(currentState); setToast('候选都被排除啦，去「我的喜好」放回几个选项吧。'); return }
-    const nextState = { ...currentState, lastShown: [{ id: picked.item.id, timestamp: Date.now() }, ...currentState.lastShown.filter(x => x.id !== picked.item.id)].slice(0, 100) }
-    setState(nextState)
+    if (!picked && excludeId) picked = pickRecommendation(chosenKind, cleanedState, { ...options, excludeId: undefined })
+    if (!picked) { setState(cleanedState); setToast('当前条件下没有合适的选项，试试放宽筛选吧。'); return }
+    setState(rememberDraw(cleanedState, picked.item, now))
     setKind(chosenKind)
     setResult(picked)
     setAccepted(false)
@@ -93,7 +110,7 @@ export default function App() {
       next[dislikedKey] = Array.from(new Set([...state[dislikedKey], item.name]))
       next[likedKey] = state[likedKey].filter(x => x !== item.name)
     } else if (reason === 'today') {
-      next.todayRejected = [...state.todayRejected.filter(x => x.day === dayKey()), { id: item.id, day: dayKey() }]
+      next.todayRejected = addTodayRejectedItem(state, item.id, item.kind).todayRejected
     } else {
       next.history = [{ id: `${Date.now()}-manual`, itemId: item.id, name: item.name, kind: item.kind, timestamp: Date.now(), fromRecommendation: false }, ...state.history].slice(0, 100)
     }
@@ -136,7 +153,7 @@ export default function App() {
       {screen === 'favorites' && <FavoritesPage state={state} onRemove={toggleFavorite} onChoose={chooseFavorite} />}
       {screen === 'dex' && <DexPage kind={dexKind} query={dexQuery} filterKey={dexFilter} state={state} onKindChange={changeDexKind} onQueryChange={setDexQuery} onFilterChange={setDexFilter} onFavorite={toggleFavorite} onPreference={changeDexPreference} onDraw={items => startDexDraw(items)} />}
       {screen === 'dex-rolling' && result && <RollingPage kind={result.item.kind} result={result} options={dexPool} onComplete={() => setScreen('dex-result')} />}
-      {screen === 'dex-result' && result && <DexResultPage item={result.item} accepted={accepted} onAccept={accept} onReroll={() => startDexDraw(dexPool, result.item.id)} onBack={() => setScreen('dex')} />}
+      {screen === 'dex-result' && result && <DexResultPage result={result} accepted={accepted} onAccept={accept} onReroll={() => startDexDraw(dexPool, result.item.id)} onBack={() => { recentDraws.current = []; setScreen('dex') }} />}
     </motion.div></AnimatePresence>
     <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="toast" role="status">{toast}</motion.div>}</AnimatePresence>
     <div className="bottom-checker" aria-hidden="true" />

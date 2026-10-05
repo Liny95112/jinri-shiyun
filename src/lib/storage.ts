@@ -25,7 +25,7 @@ export function loadState(): SavedState {
       likedDrink: stringArray(saved.likedDrink), dislikedDrink: stringArray(saved.dislikedDrink),
       favorites: stringArray(saved.favorites),
       history: Array.isArray(saved.history) ? saved.history.filter((h): h is HistoryEntry => Boolean(h && typeof h === 'object' && typeof h.name === 'string' && typeof h.timestamp === 'number')).slice(0, 100) : [],
-      todayRejected: Array.isArray(saved.todayRejected) ? saved.todayRejected.filter(x => x && typeof x.id === 'string' && typeof x.day === 'string') : [],
+      todayRejected: Array.isArray(saved.todayRejected) ? saved.todayRejected.filter(x => x && typeof x.id === 'string' && x.day === dayKey()) : [],
       lastShown: Array.isArray(saved.lastShown) ? saved.lastShown.filter(x => x && typeof x.id === 'string' && typeof x.timestamp === 'number').slice(0, 100) : [],
       foodFilters: { ...defaultFoodFilters, ...saved.foodFilters },
       drinkFilters: { ...defaultDrinkFilters, ...saved.drinkFilters }
@@ -41,6 +41,23 @@ export function saveState(state: SavedState): void {
 
 export function dayKey(date = new Date()): string {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+}
+
+/** Reuse the v1 field; expired local-day rejections are removed on load and before each draw. */
+export function getTodayRejectedItems(state: SavedState, date = new Date(), kind?: Kind) {
+  return state.todayRejected.filter(entry => entry.day === dayKey(date) && (!kind || !entry.kind || entry.kind === kind))
+}
+
+export function cleanupExpiredTodayRejectedItems(state: SavedState, date = new Date()): SavedState {
+  const todayRejected = getTodayRejectedItems(state, date)
+  return todayRejected.length === state.todayRejected.length ? state : { ...state, todayRejected }
+}
+
+export function addTodayRejectedItem(state: SavedState, id: string, kind: Kind, date = new Date()): SavedState {
+  const todayRejected = getTodayRejectedItems(state, date)
+  return { ...state, todayRejected: todayRejected.some(entry => entry.id === id && (!entry.kind || entry.kind === kind))
+    ? todayRejected
+    : [...todayRejected, { id, kind, day: dayKey(date) }] }
 }
 
 export function preferenceKeys(kind: Kind): ['likedFood' | 'likedDrink', 'dislikedFood' | 'dislikedDrink'] {

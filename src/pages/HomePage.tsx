@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { PixelScene } from '../components/PixelScene'
 import { PixelButton, PixelCard } from '../components/PixelUI'
+import { APP_VERSION } from '../config'
 import type { Kind } from '../types'
 
 export function HomePage({ onPick, onNavigate }: { onPick: (kind: Kind) => void; onNavigate: (page: 'preferences' | 'history' | 'favorites') => void }) {
@@ -14,5 +15,6 @@ export function HomePage({ onPick, onNavigate }: { onPick: (kind: Kind) => void;
     </div>
     <PixelCard className="home-shortcuts"><span className="shortcuts-title">我的小背包</span><div className="shortcuts-grid"><button onClick={() => onNavigate('preferences')}><span>💗</span>我的喜好</button><button onClick={() => onNavigate('history')}><span>🕒</span>最近吃喝</button><button onClick={() => onNavigate('favorites')}><span>⭐</span>收藏结果</button></div></PixelCard>
     <p className="home-footer">✦ 今天也要好好照顾自己呀 ✦</p>
+    <small className="block text-center text-[10px] text-[#a77b65]">v{APP_VERSION}</small>
   </main>
 }

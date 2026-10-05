@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { drinks, foods } from '../data/items'
-import type { Kind, PickResult } from '../types'
+import type { Item, Kind, PickResult } from '../types'
 
-export function RollingPage({ kind, result, onComplete }: { kind: Kind; result: PickResult; onComplete: () => void }) {
-  const candidates = kind === 'food' ? foods : drinks
-  const [current, setCurrent] = useState(candidates[0])
+export function RollingPage({ kind, result, onComplete, options }: { kind: Kind; result: PickResult; onComplete: () => void; options?: Item[] }) {
+  const candidates: Item[] = options ?? (kind === 'food' ? foods : drinks)
+  const [current, setCurrent] = useState<Item>(candidates[0] ?? result.item)
   const completeRef = useRef(onComplete)
   completeRef.current = onComplete
   const reducedMotion = useReducedMotion()
@@ -15,7 +15,7 @@ export function RollingPage({ kind, result, onComplete }: { kind: Kind; result: 
     let index = 0
     let revealTimeout: number | undefined
     const interval = window.setInterval(() => { index = (index + 7) % candidates.length; setCurrent(candidates[index]) }, reducedMotion ? 180 : 85)
-    const timeout = window.setTimeout(() => { window.clearInterval(interval); setCurrent(result.item as typeof candidates[number]); revealTimeout = window.setTimeout(() => completeRef.current(), reducedMotion ? 150 : 270) }, duration)
+    const timeout = window.setTimeout(() => { window.clearInterval(interval); setCurrent(result.item); revealTimeout = window.setTimeout(() => completeRef.current(), reducedMotion ? 150 : 270) }, duration)
     return () => { window.clearInterval(interval); window.clearTimeout(timeout); if (revealTimeout) window.clearTimeout(revealTimeout) }
   }, [candidates, reducedMotion, result.item])
 

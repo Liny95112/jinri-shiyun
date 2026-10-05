@@ -272,4 +272,3 @@ export const drinks: DrinkItem[] = [
 
 export const allItems: Item[] = [...foods, ...drinks]
 export const itemById = new Map(allItems.map(item => [item.id, item]))
-

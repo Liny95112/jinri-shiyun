@@ -16,6 +16,7 @@ export interface RecommendationOptions {
   excludeId?: string
   recentDraws?: readonly string[]
   usePickerFilters?: boolean
+  ignoreTimePreference?: boolean
   now?: Date
   random?: () => number
 }
@@ -180,7 +181,7 @@ export function scoreRecommendation(item: Item, state: SavedState, options: Reco
       if (drink.caffeine !== 'any' && item.caffeine === (drink.caffeine === 'yes')) filters += 12
     }
   }
-  const time = getTimePreferenceScore(item, now)
+  const time = options.ignoreTimePreference ? 0 : getTimePreferenceScore(item, now)
   const shown = state.lastShown.find(entry => entry.id === item.id)
   const lastShown = shown && now.getTime() - shown.timestamp < 7 * 86400000 ? -14 : 5
   const latestHistory = state.history.filter(entry => entry.kind === kind && entry.itemId === item.id)

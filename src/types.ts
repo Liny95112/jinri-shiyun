@@ -59,6 +59,20 @@ export interface HistoryEntry {
   fromRecommendation: boolean
 }
 
+export type FortuneLevel = '大吉' | '中吉' | '小吉' | '吉' | '平'
+
+export interface DailyFortune {
+  date: string
+  fortuneLevel: FortuneLevel
+  foodId: string
+  drinkId: string
+  luckyTaste: string
+  luckyTags: string[]
+  message: string
+  acceptedFood?: boolean
+  acceptedDrink?: boolean
+}
+
 export interface SavedState {
   likedFood: string[]
   dislikedFood: string[]
@@ -70,6 +84,7 @@ export interface SavedState {
   lastShown: { id: string; timestamp: number }[]
   foodFilters: FoodFilters
   drinkFilters: DrinkFilters
+  dailyFortune: DailyFortune | null
 }
 
 export interface PickResult { item: Item; reason: string; hint: string }

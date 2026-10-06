@@ -18,7 +18,7 @@ export function DailyFortunePage({ fortune, food, drink, onDraw, onChoose }: {
 
   useEffect(() => {
     if (phase !== 'drawing') return
-    const timer = window.setTimeout(() => setPhase('revealed'), reducedMotion ? 80 : 2500)
+    const timer = window.setTimeout(() => setPhase('revealed'), reducedMotion ? 80 : 2200)
     return () => window.clearTimeout(timer)
   }, [phase, reducedMotion])
 
@@ -31,7 +31,7 @@ export function DailyFortunePage({ fortune, food, drink, onDraw, onChoose }: {
   return <main className="page fortune-page">
     <div className="page-intro fortune-intro"><div className="eyebrow">DAILY LUCK / 一天一签</div><h1>🎴 今日食签</h1><p>{phase === 'ready' ? '今天的胃，会被什么选中呢？' : '把今天的小小食运，收进口袋里。'}</p></div>
     {phase !== 'revealed' && <div className="fortune-draw-scene" aria-live="polite">
-      <div className="fortune-scene-stars" aria-hidden="true">✦ <span>✧</span> ✦</div>
+      <div className={`fortune-scene-stars ${phase === 'drawing' ? 'is-drawing' : ''}`} aria-hidden="true">✦ <span>✧</span> ✦</div>
       <motion.div className="fortune-tube" animate={phase === 'drawing' && !reducedMotion ? { rotate: [0, -8, 8, -6, 6, 0] } : { rotate: 0 }} transition={{ duration: 1.1, repeat: phase === 'drawing' && !reducedMotion ? 1 : 0 }} aria-hidden="true">
         <div className="fortune-tube__sticks">▥ ▥ ▥</div><div className="fortune-tube__body">食<br />运</div><div className="fortune-tube__base" />
       </motion.div>

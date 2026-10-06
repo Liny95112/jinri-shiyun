@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { drinks, foods } from '../data/items'
 import { EmptyState, PixelButton, PixelCard, SectionTitle } from '../components/PixelUI'
 import type { Kind, SavedState } from '../types'
@@ -18,6 +18,8 @@ function PreferenceModule({ config, values, onAdd, onRemove }: { config: typeof 
 }
 
 export function PreferencesPage({ state, onChange }: { state: SavedState; onChange: (key: Key, value: string, add: boolean) => void }) {
+  useLayoutEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }) }, [])
+
   const [kind, setKind] = useState<Kind>('food')
   const featured = kind === 'food' ? foods.slice(0, 9) : drinks.slice(0, 9)
   const liked = kind === 'food' ? state.likedFood : state.likedDrink

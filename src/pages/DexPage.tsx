@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { DexCard } from '../components/DexCard'
 import { EmptyState, FilterChip, PixelButton } from '../components/PixelUI'
 import { drinks, foods } from '../data/items'
@@ -38,6 +38,9 @@ export function DexPage({ kind, query, filterKey, state, onKindChange, onQueryCh
   onPreference: (item: Item, preference: 'liked' | 'disliked', add: boolean) => void
   onDraw: (items: Item[]) => void
 }) {
+  // A newly entered page should not inherit the previous screen's window scroll.
+  useLayoutEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }) }, [])
+
   const items: Item[] = kind === 'food' ? foods : drinks
   const filters = useMemo(() => filtersFor(items, kind), [items, kind])
   const selected = filters.find(filter => filter.key === filterKey) ?? filters[0]

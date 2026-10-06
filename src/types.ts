@@ -1,6 +1,6 @@
 export type Kind = 'food' | 'drink'
 export type Budget = 'low' | 'mid' | 'high'
-export type Mood = 'happy' | 'tired' | 'annoyed' | 'treat' | 'comfort'
+export type Mood = 'happy' | 'tired' | 'annoyed' | 'stressed' | 'low-appetite' | 'craving' | 'treat' | 'comfort' | 'any'
 export type FoodCategory = 'meal' | 'snack' | 'dessert'
 export type Taste = 'light' | 'rich' | 'spicy' | 'sweet'
 export type DrinkCategory = 'milk-tea' | 'coffee' | 'fruit-tea' | 'soda' | 'hot-drink'

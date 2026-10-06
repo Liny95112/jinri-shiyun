@@ -1,9 +1,13 @@
 import { drinks, foods } from '../data/items'
 import { getTodayRejectedItems, preferenceKeys } from './storage'
-import type { DrinkFilters, FoodFilters, Item, Kind, PickResult, SavedState } from '../types'
+import type { Budget, DrinkFilters, FoodFilters, FoodItem, Item, Kind, Mood, PickResult, SavedState } from '../types'
 
 const budgetLevel = { low: 0, mid: 1, high: 2 }
-const moodText = { happy:'开心', tired:'累了', annoyed:'烦躁', treat:'想吃好的', comfort:'想被安慰' }
+const moodText: Record<Mood, string> = {
+  happy:'开心', tired:'累了', annoyed:'烦躁', stressed:'压力大',
+  'low-appetite':'没胃口', craving:'嘴馋了', treat:'想犒劳自己',
+  comfort:'想被安慰', any:'随便啦'
+}
 
 export type DayPeriod = 'breakfast' | 'lunch' | 'tea' | 'dinner' | 'late'
 
@@ -61,6 +65,47 @@ function getPeriodHint(kind: Kind, period: DayPeriod): string {
 
 function hasTag(item: Item, ...tags: string[]): boolean {
   return item.tags.some(tag => tags.some(needle => tag.includes(needle)))
+}
+
+/** Mood is a soft preference layered after explicit picker filters. Existing tags carry the food cues. */
+export function getFoodMoodScore(item: FoodItem, selected: Mood, chosenBudget: Budget, liked = false): number {
+  if (selected === 'any') return 0
+  const cue = (...words: string[]) => hasTag(item, ...words) || words.some(word => item.name.includes(word))
+  const is = (taste: FoodItem['tastes'][number]) => item.tastes.includes(taste)
+  const base = item.moods.includes(selected) ? 10 : 0
+  switch (selected) {
+    case 'happy':
+      return base + (item.category === 'dessert' ? 6 : 0)
+        + (item.category === 'meal' && cue('聚餐', '火锅', '烤肉', '日料', '韩餐') ? 7 : 0)
+    case 'tired':
+      return base + (item.moods.includes('comfort') ? 5 : 0)
+        + (cue('粥', '汤', '面', '粉', '盖饭', '米饭', '热乎') ? 9 : 0)
+        + (is('light') ? 5 : 0) - (is('spicy') && is('rich') ? 6 : 0)
+    case 'annoyed':
+      return base + (is('rich') || is('spicy') ? 9 : 0)
+        + (cue('炸物', '酥脆', '烧烤', '火锅', '烤肉') ? 7 : 0)
+        + (item.category === 'dessert' ? 5 : 0)
+    case 'stressed':
+      return (item.moods.includes('comfort') || item.moods.includes('treat') ? 9 : 0)
+        + (item.category === 'dessert' ? 8 : 0)
+        + (is('sweet') || is('rich') ? 5 : 0) + (liked ? 5 : 0)
+    case 'low-appetite':
+      return (is('light') ? 16 : 0)
+        + (cue('粥', '汤', '米粉', '米线', '面', '清爽', '水果', '小份') ? 10 : 0)
+        + (item.category === 'snack' ? 6 : 0)
+        - (is('spicy') ? 10 : 0) - (is('rich') ? 8 : 0)
+        - (cue('火锅', '烤肉', '烧烤', '炸物', '油腻', '聚餐') ? 10 : 0)
+    case 'craving':
+      return (item.category === 'snack' || item.category === 'dessert' ? 16 : -5)
+        + (cue('炸物', '酥脆', '冰淇淋', '蛋糕', '甜', '夜宵') ? 7 : 0)
+    case 'treat':
+      return base + (cue('火锅', '烤肉', '牛排', '寿司', '刺身', '寿喜', '日料', '聚餐') ? 10 : 0)
+        + (item.category === 'dessert' ? 6 : 0)
+        + (item.budget === chosenBudget && chosenBudget === 'high' ? 8 : 0)
+    case 'comfort':
+      return base + (cue('热乎', '汤', '粥', '面', '咖喱') ? 8 : 0)
+        + (is('sweet') || item.category === 'dessert' ? 6 : 0)
+  }
 }
 
 /** Category and existing tags guide the daypart; nothing is removed from the pool. */
@@ -127,7 +172,7 @@ export function scoreRecommendation(item: Item, state: SavedState, options: Reco
     if (item.kind === 'food') {
       if (food.category !== 'any' && item.category === food.category) filters += 14
       if (food.taste !== 'any' && item.tastes.includes(food.taste)) filters += 13
-      if (item.moods.includes(food.mood)) mood += 10
+      mood += getFoodMoodScore(item, food.mood, food.budget, preference > 0)
     } else {
       if (drink.category !== 'any' && item.category === drink.category) filters += 14
       if (drink.temperature !== 'any' && item.temperatures.includes(drink.temperature)) filters += 13
@@ -159,7 +204,7 @@ function reason(item: Item, kind: Kind, state: SavedState, food: FoodFilters, dr
   if (state[likedKey].some(entry => matchesText(item, entry))) notes.push('它在你的喜欢清单里')
   if (usePickerFilters && item.kind === 'food') {
     if (food.taste !== 'any' && item.tastes.includes(food.taste)) notes.push('很合你想吃的口味')
-    if (item.moods.includes(food.mood)) notes.push(`适合你现在“${moodText[food.mood]}”的心情`)
+    if (food.mood !== 'any' && getFoodMoodScore(item, food.mood, food.budget) > 0) notes.push(`适合你现在“${moodText[food.mood]}”的心情`)
   } else if (usePickerFilters && item.kind === 'drink') {
     if (drink.temperature !== 'any' && item.temperatures.includes(drink.temperature)) notes.push('温度正合适')
     if (drink.caffeine !== 'any' && item.caffeine === (drink.caffeine === 'yes')) notes.push(drink.caffeine === 'yes' ? '可以帮你提提神' : '不含咖啡因')

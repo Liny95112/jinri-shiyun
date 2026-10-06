@@ -52,4 +52,7 @@ h1,h2,p{margin-top:0}.page h1{font-size:30px;line-height:1.23;letter-spacing:.03
 .dex-card__actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}.dex-card__actions button{min-width:0;min-height:42px;padding:5px 3px;border:2px solid #c99b7a;background:#fff1d7;color:#8e644e;font-size:11px;font-weight:900;line-height:1.25;touch-action:manipulation}.dex-card__actions button.is-active{background:#e6a394;border-color:#9d6657;color:#fff9e9}.dex-card__actions button.is-like{background:#e49a9d}.dex-card__actions button.is-dislike{background:#a98477}
 .dex-empty{padding:8px 0 30px;text-align:center}.dex-empty .empty-state{padding:28px 10px 18px}.dex-result-page .result-card h2{overflow-wrap:anywhere}
 .result-time-hint{display:inline-block;margin:4px 0 9px;padding:4px 8px;background:#fff0d5;border:1px solid #d9b696;color:#976c53;font-size:11px;font-weight:800}
+.mood-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mood-grid .filter-chip{min-width:0;min-height:46px;padding:7px 2px;font-size:12px;line-height:1.25;white-space:nowrap}
+@media (max-width:360px){.mood-grid{gap:6px}.mood-grid .filter-chip{padding:6px 1px;font-size:10px}}
 @media (max-width:360px){.dex-filters{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}.dex-home-entry small{display:none}.dex-card__actions button{font-size:10px}}

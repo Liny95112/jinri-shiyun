@@ -28,6 +28,7 @@
 - `fx/`：16×16 闪光 3 帧。
 - `food/`：32×32 拉面、寿司样板。
 - `drink/`：32×32 奶茶、咖啡样板。
+- `home/`：0.7.0 首页小食堂主视觉、吃喝入口图标与四个辅助 UI 图标。
 
 运行 `python scripts/generate-pixel-fortune.py` 可复现这批 PNG；网页构建不需要 Python。后续扩充食品图标前，先沿用这套规格和色板。
 
@@ -37,3 +38,17 @@
 - 播放顺序与每姿势持续时间写在 `DailyFortunePage.tsx` 的 `shakeSequence`，总摇签时间 1,250ms；之后下压 2px 持续 80ms。
 - 签纸是原有 `fortune_paper.png`，用 430ms 的整数像素阶梯位移弹出；三处星光错开 85ms，各自切换现有 3 帧。
 - 可用 `python scripts/generate-pixel-fortune.py --asset fortune_jar_shake_04.png` 单独重制一张，再立即用 `pixel-art` Skill 审计。
+
+## 0.7.0 首页素材
+
+| 文件 | 原始尺寸 | 用途与缩放 |
+| --- | --- | --- |
+| `home/home_shop.png` | 160×96 | 日式街角小食堂；常规手机 2 倍、窄屏 1 倍；不拉伸 |
+| `home/home_food_icon.png` | 32×32 | “今天吃什么”饭碗；原尺寸显示 |
+| `home/home_drink_icon.png` | 32×32 | “今天喝什么”中性饮品杯；原尺寸显示 |
+| `home/icon_heart.png` | 16×16 | 我的喜好；2 倍显示 |
+| `home/icon_history.png` | 16×16 | 最近吃喝；2 倍显示 |
+| `home/icon_favorite.png` | 16×16 | 收藏结果；2 倍显示 |
+| `home/icon_dex.png` | 16×16 | 美食图鉴；2 倍显示 |
+
+小店画面包含木质店面、暖帘、灯笼、出餐窗、菜单牌与盆栽，保持静态。以上 7 张 PNG 与食签素材共享原有 16 色锁定色板、深棕描边与右上方光源；没有半透明边缘，图片统一使用 `image-rendering: pixelated`。用 `python scripts/generate-pixel-home.py --asset home_shop.png` 等命令可逐张重制并审计。

@@ -1,4 +1,5 @@
 import type { DailyFortune, DrinkFilters, FoodFilters, FortuneLevel, HistoryEntry, Kind, SavedState } from '../types'
+import { APP_VERSION } from '../config'
 
 const KEY = 'jinri-shiyun:v1'
 
@@ -8,7 +9,9 @@ export const defaultDrinkFilters: DrinkFilters = { category: 'any', temperature:
 export const initialState: SavedState = {
   likedFood: [], dislikedFood: [], likedDrink: [], dislikedDrink: [],
   favorites: [], history: [], todayRejected: [], lastShown: [],
-  foodFilters: defaultFoodFilters, drinkFilters: defaultDrinkFilters, dailyFortune: null
+  foodFilters: defaultFoodFilters, drinkFilters: defaultDrinkFilters, dailyFortune: null,
+  // A fresh install has no previous release to announce; existing saved data keeps its version.
+  lastSeenVersion: APP_VERSION
 }
 
 function stringArray(value: unknown): string[] {

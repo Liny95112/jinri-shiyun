@@ -1,14 +1,21 @@
 export interface UpdateLogEntry {
   version: string
   date: string
-  showPopup: boolean
   sections: { title: string; items: string[] }[]
 }
 
-// Keep these entries in step with CHANGELOG.md. Only highlighted releases open a popup.
+// Keep these entries in step with CHANGELOG.md; each published version announces itself once.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
-    version: '0.5.0', date: '2026-10-07', showPopup: true,
+    version: '0.5.1', date: '2026-10-07',
+    sections: [{ title: '优化', items: [
+      '优化版本更新提示，仅在升级后首次打开时显示。',
+      '更新公告不再常驻首页。',
+      '首页界面更加简洁，弹窗直接展示本次变化。'
+    ] }]
+  },
+  {
+    version: '0.5.0', date: '2026-10-07',
     sections: [
       { title: '新增', items: [
         '新增每日「今日食签」提醒。',
@@ -22,14 +29,14 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ]
   },
   {
-    version: '0.4.1', date: '2026-10-06', showPopup: false,
+    version: '0.4.1', date: '2026-10-06',
     sections: [{ title: '修复', items: [
       '修复进入“美食图鉴”时可能继承上一页面滚动位置、停留在页面中部或底部的问题。',
       '修复进入“我的喜好”时可能继承上一页面滚动位置的问题。'
     ] }]
   },
   {
-    version: '0.4.0', date: '2026-10-06', showPopup: false,
+    version: '0.4.0', date: '2026-10-06',
     sections: [{ title: '新增', items: [
       '新增像素风「今日食签」，每天按设备本地日期领取一张固定食签，并提供轻量抽签揭晓动画。',
       '新增大吉、中吉、小吉、吉、平五种正向签运，以及幸运食物、饮品、口味、今日宜和今日食语。',
@@ -38,7 +45,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.3.1', date: '2026-10-06', showPopup: false,
+    version: '0.3.1', date: '2026-10-06',
     sections: [{ title: '优化', items: [
       '完善“今天吃什么”的心情选项，加入压力大、没胃口、嘴馋了、随便啦，并将“想吃好的”整理为“犒劳自己”。',
       '根据现有类别、口味、预算、心情和标签细化不同心情的推荐权重；“随便啦”不施加心情权重。',
@@ -46,7 +53,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.3.0', date: '2026-10-05', showPopup: false,
+    version: '0.3.0', date: '2026-10-05',
     sections: [{ title: '新增与优化', items: [
       '新增按设备本地时间段调整权重的智能推荐，并在首页与结果页显示轻量提示。',
       '根据最近吃喝记录自动降权，并在当前抽取会话中降低重复结果概率。',
@@ -56,7 +63,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.2.0', date: '2026-10-05', showPopup: false,
+    version: '0.2.0', date: '2026-10-05',
     sections: [{ title: '新增', items: [
       '新增美食图鉴，直接展示现有全部食品与饮品。',
       '支持名称实时搜索、按现有分类和标签筛选，并显示当前结果数量。',
@@ -65,7 +72,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.1.0', date: '2026-10-05', showPopup: false,
+    version: '0.1.0', date: '2026-10-05',
     sections: [{ title: '基础版本', items: [
       '建立统一应用版本号，并在首页底部显示。',
       '当前测试版包含吃喝筛选、抽取推荐、喜好、历史、收藏和 PWA 离线访问。',

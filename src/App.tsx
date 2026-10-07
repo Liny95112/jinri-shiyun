@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { APP_VERSION } from './config'
-import { UPDATE_LOG } from './data/updateLog'
 import { pickRecommendation } from './lib/recommend'
 import { drinks, foods } from './data/items'
 import { fortuneDateKey, generateDailyFortune, getTodayFortune, repairDailyFortune } from './lib/dailyFortune'
@@ -17,10 +16,9 @@ import { FavoritesPage } from './pages/FavoritesPage'
 import { DexPage } from './pages/DexPage'
 import { DexResultPage } from './pages/DexResultPage'
 import { DailyFortunePage } from './pages/DailyFortunePage'
-import { UpdateLogPage } from './pages/UpdateLogPage'
 import type { DrinkFilters, FoodFilters, Item, Kind, PickResult, SavedState } from './types'
 
-type Screen = 'home' | 'picker' | 'rolling' | 'result' | 'preferences' | 'history' | 'favorites' | 'dex' | 'dex-rolling' | 'dex-result' | 'fortune' | 'updates'
+type Screen = 'home' | 'picker' | 'rolling' | 'result' | 'preferences' | 'history' | 'favorites' | 'dex' | 'dex-rolling' | 'dex-result' | 'fortune'
 type PreferenceKey = 'likedFood' | 'dislikedFood' | 'likedDrink' | 'dislikedDrink'
 
 export default function App() {
@@ -46,8 +44,7 @@ export default function App() {
   useEffect(() => () => { if (noticeTimer.current !== null) window.clearTimeout(noticeTimer.current) }, [])
   useEffect(() => {
     if (screen !== 'home' || homeNotice || pauseFortuneNotice) return
-    const currentUpdate = UPDATE_LOG.find(entry => entry.version === APP_VERSION)
-    if (currentUpdate?.showPopup && state.lastSeenVersion !== APP_VERSION) {
+    if (state.lastSeenVersion !== APP_VERSION) {
       setHomeNotice('update')
       return
     }
@@ -87,10 +84,9 @@ export default function App() {
     else goHome()
   }
 
-  function openHomeSection(page: 'preferences' | 'history' | 'favorites' | 'dex' | 'updates') {
+  function openHomeSection(page: 'preferences' | 'history' | 'favorites' | 'dex') {
     recentDraws.current = []
     if (page === 'dex') { setDexKind('food'); setDexQuery(''); setDexFilter('all') }
-    if (page === 'updates') markVersionSeen()
     setScreen(page)
   }
 
@@ -241,14 +237,13 @@ export default function App() {
     setToast(`已记录：今天就${item.kind === 'food' ? '吃' : '喝'}${item.name}！`)
   }
 
-  const titles: Record<Screen, string> = { home:'今日食运', picker:'选择条件', rolling:'抽取中', result:'今日推荐', preferences:'我的喜好', history:'最近吃喝', favorites:'收藏结果', dex:'美食图鉴', 'dex-rolling':'图鉴抽取中', 'dex-result':'图鉴揭晓', fortune:'今日食签', updates:'更新公告' }
+  const titles: Record<Screen, string> = { home:'今日食运', picker:'选择条件', rolling:'抽取中', result:'今日推荐', preferences:'我的喜好', history:'最近吃喝', favorites:'收藏结果', dex:'美食图鉴', 'dex-rolling':'图鉴抽取中', 'dex-result':'图鉴揭晓', fortune:'今日食签' }
 
   const todayFortune = getTodayFortune(state)
 
   return <div className="app-shell"><header className="app-header flex items-center">{screen === 'home' ? <><div className="brand-mark">✦</div><span>好运小食堂</span><span className="header-badge">OPEN ♡</span></> : <><button className="back-button" onClick={goBack} aria-label="返回上一页">‹</button><span>{titles[screen]}</span><button className="home-button" onClick={goHome} aria-label="返回首页">⌂</button></>}</header>
     <AnimatePresence mode="wait"><motion.div key={`${screen}-${screen === 'rolling' || screen === 'dex-rolling' ? rollId : ''}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: .22 }} className="screen-wrap">
-      {screen === 'home' && <HomePage onPick={chosen => { setKind(chosen); setScreen('picker') }} onNavigate={openHomeSection} onFortune={openFortune} hasNewUpdate={state.lastSeenVersion !== APP_VERSION} />}
-      {screen === 'updates' && <UpdateLogPage />}
+      {screen === 'home' && <HomePage onPick={chosen => { setKind(chosen); setScreen('picker') }} onNavigate={openHomeSection} onFortune={openFortune} />}
       {screen === 'fortune' && <DailyFortunePage fortune={todayFortune} food={foods.find(item => item.id === todayFortune?.foodId)} drink={drinks.find(item => item.id === todayFortune?.drinkId)} onDraw={drawFortune} onChoose={chooseFortuneItem} />}
       {screen === 'picker' && <PickerPage kind={kind} state={state} onChange={updateFilters} onStart={() => startRoll()} />}
       {screen === 'rolling' && result && <RollingPage kind={kind} result={result} onComplete={() => setScreen('result')} />}
@@ -260,7 +255,7 @@ export default function App() {
       {screen === 'dex-rolling' && result && <RollingPage kind={result.item.kind} result={result} options={dexPool} onComplete={() => setScreen('dex-result')} />}
       {screen === 'dex-result' && result && <DexResultPage result={result} accepted={accepted} onAccept={accept} onReroll={() => startDexDraw(dexPool, result.item.id)} onBack={() => { recentDraws.current = []; setScreen('dex') }} />}
     </motion.div></AnimatePresence>
-    <HomeNotices notice={homeNotice} onClose={closeHomeNotice} onOpenUpdate={() => { closeHomeNotice(); setScreen('updates') }} onOpenFortune={() => { closeHomeNotice(); openFortune() }} />
+    <HomeNotices notice={homeNotice} onClose={closeHomeNotice} onOpenFortune={() => { closeHomeNotice(); openFortune() }} />
     <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="toast" role="status">{toast}</motion.div>}</AnimatePresence>
     <div className="bottom-checker" aria-hidden="true" />
   </div>

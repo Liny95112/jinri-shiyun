@@ -45,7 +45,10 @@ export function loadState(): SavedState {
       lastShown: Array.isArray(saved.lastShown) ? saved.lastShown.filter(x => x && typeof x.id === 'string' && typeof x.timestamp === 'number').slice(0, 100) : [],
       foodFilters: { ...defaultFoodFilters, ...saved.foodFilters },
       drinkFilters: { ...defaultDrinkFilters, ...saved.drinkFilters },
-      dailyFortune: readDailyFortune(saved.dailyFortune)
+      dailyFortune: readDailyFortune(saved.dailyFortune),
+      fortuneReminder: typeof saved.fortuneReminder?.lastShownDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(saved.fortuneReminder.lastShownDate)
+        ? { lastShownDate: saved.fortuneReminder.lastShownDate } : undefined,
+      lastSeenVersion: typeof saved.lastSeenVersion === 'string' ? saved.lastSeenVersion : undefined
     }
   } catch {
     return initialState

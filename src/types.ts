@@ -85,6 +85,8 @@ export interface SavedState {
   foodFilters: FoodFilters
   drinkFilters: DrinkFilters
   dailyFortune: DailyFortune | null
+  fortuneReminder?: { lastShownDate: string }
+  lastSeenVersion?: string
 }
 
 export interface PickResult { item: Item; reason: string; hint: string }

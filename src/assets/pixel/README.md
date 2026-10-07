@@ -43,7 +43,10 @@
 
 | 文件 | 原始尺寸 | 用途与缩放 |
 | --- | --- | --- |
-| `home/home_shop.png` | 160×96 | 日式街角小食堂；常规手机 2 倍、窄屏 1 倍；不拉伸 |
+| `home/home_shop.png` | 160×96 | 0.7.0 原始白天版，保留作画风参考 |
+| `home/home_shop_morning.png` / `_idle.png` | 各 160×96 | 早餐；浅奶油晨光、较淡的灯笼；门帘轻摆 2 帧 |
+| `home/home_shop_day.png` / `_idle.png` | 各 160×96 | 午餐与下午茶；明亮营业中的木质店面；门帘轻摆 2 帧 |
+| `home/home_shop_night.png` / `_idle.png` | 各 160×96 | 晚餐与夜宵；深暖背景、明亮橱窗与灯笼；门帘及灯光 2 帧 |
 | `home/home_food_icon.png` | 32×32 | “今天吃什么”饭碗；原尺寸显示 |
 | `home/home_drink_icon.png` | 32×32 | “今天喝什么”中性饮品杯；原尺寸显示 |
 | `home/icon_heart.png` | 16×16 | 我的喜好；2 倍显示 |
@@ -51,4 +54,10 @@
 | `home/icon_favorite.png` | 16×16 | 收藏结果；2 倍显示 |
 | `home/icon_dex.png` | 16×16 | 美食图鉴；2 倍显示 |
 
-小店画面包含木质店面、暖帘、灯笼、出餐窗、菜单牌与盆栽，保持静态。以上 7 张 PNG 与食签素材共享原有 16 色锁定色板、深棕描边与右上方光源；没有半透明边缘，图片统一使用 `image-rendering: pixelated`。用 `python scripts/generate-pixel-home.py --asset home_shop.png` 等命令可逐张重制并审计。
+0.7.0 的原始小店画面包含木质店面、暖帘、灯笼、出餐窗、菜单牌与盆栽。原有 7 张 PNG 与食签素材共享 16 色锁定色板、深棕描边与右上方光源；没有半透明边缘。用 `python scripts/generate-pixel-home.py --asset home_shop.png` 等命令可逐张重制并审计。
+
+## 0.7.1 小食堂时段画面
+
+- 复用 `getDayPeriod()`：早餐用早晨版，午餐和下午茶用白天版，晚餐和夜宵用夜晚版。每次进入首页选定画面，停留时不定时切换。
+- 每个时段有一张静态底图和一张仅改变门帘边缘的待机帧；夜晚待机帧还改变灯笼亮色。两帧以 `steps(1,end)` 硬切换，循环 3.2 秒；减少动态效果时只显示底图。
+- 六张正式画面均为原生 160×96，在常规手机按 2 倍、320px 窄屏按 1 倍显示；没有 CSS 滤镜、小数缩放、渐变或半透明边缘。用 `python scripts/generate-pixel-home.py --asset home_shop_night.png` 等命令逐张重制后运行 Skill 审计。

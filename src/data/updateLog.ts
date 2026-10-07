@@ -7,6 +7,13 @@ export interface UpdateLogEntry {
 // Keep these entries in step with CHANGELOG.md; each published version announces itself once.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
+    version: '0.7.1', date: '2026-10-07',
+    sections: [{ title: '首页氛围升级', items: [
+      '首页小食堂会根据本地时间展示早晨、白天或夜晚的像素风景。',
+      '小店门帘加入轻量待机动作，夜晚的灯笼也会温柔亮起来。'
+    ] }]
+  },
+  {
     version: '0.7.0', date: '2026-10-07',
     sections: [{ title: '像素画风升级', items: [
       '首页小食堂换上正式像素美术。',

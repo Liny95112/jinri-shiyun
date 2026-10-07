@@ -1,4 +1,4 @@
-"""Generate the 0.7.0 home sprites with the locked fortune palette.
+"""Generate the home sprites with the locked fortune palette.
 
 Create one asset at a time with --asset, audit it with pixel-art's quality
 checker, then continue. No browser build step depends on Python.
@@ -23,13 +23,27 @@ class Canvas(Sprite):
         self.draw = ImageDraw.Draw(self.image)
 
 
-def shop():
+def shop(period="day", idle=False):
     # Spec lock: 160x96, warm Japanese street-side diner, right-top light,
-    # brown outline, shared 16 colors only, and <=15 colors in this scene.
+    # brown outline, shared 16 colors only. Idle changes local details only.
+    assert period in {"morning", "day", "night"}
     s = Canvas(160, 96)
-    s.rect((0, 0, 159, 74), "paper")
-    s.rect((0, 75, 159, 95), "wood_light")
-    s.rect((0, 75, 159, 77), "paper_shadow")
+    sky = {"morning": "cream", "day": "paper", "night": "wood_dark"}[period]
+    street = {"morning": "paper", "day": "wood_light", "night": "wood"}[period]
+    street_edge = "wood_light" if period == "night" else "paper_shadow"
+    s.rect((0, 0, 159, 74), sky)
+    s.rect((0, 75, 159, 95), street)
+    s.rect((0, 75, 159, 77), street_edge)
+    if period == "morning":
+        # A blocky sunrise stays behind the facade and uses no soft glow.
+        s.rect((6, 10, 29, 19), "paper")
+        s.rect((10, 6, 25, 23), "gold")
+        s.rect((12, 7, 23, 10), "cream")
+        s.rect((26, 13, 31, 16), "paper")
+    elif period == "night":
+        # Large, quiet color blocks make the warm shop windows stand out.
+        s.rect((0, 66, 159, 74), "wood")
+        s.rect((0, 72, 159, 74), "wood_light")
     for x in (7, 26, 46, 71, 96, 121, 144):
         s.rect((x, 85, x + 10, 86), "paper_shadow")
     for x in (17, 55, 107, 151):
@@ -60,8 +74,10 @@ def shop():
     # Lit serving window with a bowl on the counter.
     s.rect((35, 33, 72, 66), "ink")
     s.rect((38, 36, 69, 62), "wood_dark")
-    s.rect((40, 38, 67, 59), "paper")
-    s.rect((63, 39, 67, 58), "cream")
+    s.rect((40, 38, 67, 59), "gold" if period == "night" else "paper")
+    s.rect((63, 39, 67, 58), "paper" if period == "night" else "cream")
+    if period == "night":
+        s.rect((41, 39, 61, 42), "cream")
     s.rect((39, 51, 68, 53), "wood")
     s.rect((45, 44, 59, 46), "ink")
     s.rect((47, 42, 57, 44), "cream")
@@ -76,8 +92,8 @@ def shop():
     s.rect((82, 42, 105, 72), "paper")
     s.rect((81, 47, 82, 68), "wood")
     s.rect((101, 47, 104, 69), "wood_light")
-    s.rect((84, 52, 99, 68), "ice")
-    s.rect((86, 53, 98, 54), "ice_light")
+    s.rect((84, 52, 99, 68), "orange" if period == "night" else "ice")
+    s.rect((86, 53, 98, 54), "gold" if period == "night" else "ice_light")
     s.rect((76, 31, 111, 43), "ink")
     s.rect((78, 33, 109, 41), "red")
     for x in (79, 89, 99):
@@ -86,13 +102,18 @@ def shop():
         s.rect((x + 3, 38, x + 5, 39), "paper")
     s.rect((88, 33, 89, 42), "ink")
     s.rect((98, 33, 99, 42), "ink")
+    if idle:
+        # Only the curtain hems shift by one or two native pixels.
+        s.rect((79, 42, 87, 43), "red")
+        s.rect((100, 42, 107, 44), "red")
+        s.rect((84, 44, 87, 44), "orange")
     s.rect((77, 70, 111, 74), "wood_dark")
 
     # Hanging lantern and small menu board.
     s.rect((123, 25, 124, 31), "ink")
     s.rect((118, 30, 130, 48), "ink")
     s.rect((120, 33, 128, 45), "red")
-    s.rect((124, 33, 127, 43), "orange")
+    s.rect((124, 33, 127, 43), "gold" if period == "night" and idle else "orange")
     s.rect((121, 35, 122, 42), "paper")
     s.rect((121, 30, 127, 32), "gold")
     s.rect((121, 45, 127, 47), "wood_dark")
@@ -205,7 +226,13 @@ def dex_icon():
 
 
 ASSETS = {
-    "home_shop.png": (shop, 15),
+    "home_shop.png": (shop, 15),  # Original 0.7.0 scene kept as a source reference.
+    "home_shop_morning.png": (lambda: shop("morning"), 16),
+    "home_shop_morning_idle.png": (lambda: shop("morning", True), 16),
+    "home_shop_day.png": (lambda: shop("day"), 16),
+    "home_shop_day_idle.png": (lambda: shop("day", True), 16),
+    "home_shop_night.png": (lambda: shop("night"), 16),
+    "home_shop_night_idle.png": (lambda: shop("night", True), 16),
     "home_food_icon.png": (food_icon, 10),
     "home_drink_icon.png": (drink_icon, 10),
     "icon_heart.png": (heart_icon, 8),

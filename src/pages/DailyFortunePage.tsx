@@ -7,6 +7,9 @@ import jarIdle from '../assets/pixel/fortune/fortune_jar_idle.png'
 import jarShake01 from '../assets/pixel/fortune/fortune_jar_shake_01.png'
 import jarShake02 from '../assets/pixel/fortune/fortune_jar_shake_02.png'
 import jarShake03 from '../assets/pixel/fortune/fortune_jar_shake_03.png'
+import jarShake04 from '../assets/pixel/fortune/fortune_jar_shake_04.png'
+import jarShake05 from '../assets/pixel/fortune/fortune_jar_shake_05.png'
+import jarShake06 from '../assets/pixel/fortune/fortune_jar_shake_06.png'
 import fortunePaper from '../assets/pixel/fortune/fortune_paper.png'
 import fortuneBadge from '../assets/pixel/fortune/fortune_badge.png'
 import sparkle01 from '../assets/pixel/fx/sparkle_01.png'
@@ -18,8 +21,18 @@ import milkTeaIcon from '../assets/pixel/drink/drink_milk_tea.png'
 import coffeeIcon from '../assets/pixel/drink/drink_coffee.png'
 
 type Phase = 'ready' | 'drawing' | 'revealed'
-const jarFrames = [jarIdle, jarShake01, jarShake02, jarShake03]
+type DrawStage = 'shake' | 'anticipate' | 'paper'
+const jarFrames = [jarIdle, jarShake01, jarShake02, jarShake03, jarShake04, jarShake05, jarShake06]
 const sparkleFrames = [sparkle01, sparkle02, sparkle03]
+// Complete pixel poses, with a slow start, quick middle, and slower stop (1,250ms).
+const shakeSequence = [
+  [0, 160], [1, 145], [2, 105], [3, 85], [4, 80], [5, 85],
+  [6, 90], [2, 85], [3, 85], [4, 95], [5, 110], [6, 125], [0, 0]
+] as const
+const anticipationMs = 80
+const paperRiseMs = 430
+const sparkleStaggerMs = 85
+const sparkleFrameMs = 65
 
 /** The four pilot icons are intentionally limited; other catalog names stay readable. */
 function pilotIcon(item?: FoodItem | DrinkItem) {
@@ -44,6 +57,9 @@ export function DailyFortunePage({ fortune, food, drink, onDraw, onChoose }: {
   const reducedMotion = useReducedMotion()
   const [phase, setPhase] = useState<Phase>(fortune ? 'revealed' : 'ready')
   const [frame, setFrame] = useState(0)
+  const [stage, setStage] = useState<DrawStage>('shake')
+  const [sparkleFrame, setSparkleFrame] = useState([-1, -1, -1])
+  const [freshReveal, setFreshReveal] = useState(false)
 
   useEffect(() => {
     if (phase !== 'drawing') return
@@ -51,21 +67,37 @@ export function DailyFortunePage({ fortune, food, drink, onDraw, onChoose }: {
       const timer = window.setTimeout(() => setPhase('revealed'), 80)
       return () => window.clearTimeout(timer)
     }
-    // Three hand-drawn poses repeat three times; the slip emerges near the end.
-    let step = 0
-    const frames = window.setInterval(() => {
-      step += 1
-      setFrame(step <= 9 ? ((step - 1) % 3) + 1 : 0)
-      if (step >= 10) window.clearInterval(frames)
-    }, 170)
-    const reveal = window.setTimeout(() => setPhase('revealed'), 2200)
-    return () => { window.clearInterval(frames); window.clearTimeout(reveal) }
+    const timers: number[] = []
+    let elapsed = 0
+    for (const [pose, duration] of shakeSequence) {
+      timers.push(window.setTimeout(() => setFrame(pose), elapsed))
+      elapsed += duration
+    }
+    timers.push(window.setTimeout(() => setStage('anticipate'), elapsed))
+    const paperStart = elapsed + anticipationMs
+    timers.push(window.setTimeout(() => setStage('paper'), paperStart))
+    // Three separate 3-frame glints start left, right, then above the jar.
+    for (let sparkle = 0; sparkle < 3; sparkle += 1) {
+      for (let pose = 0; pose < sparkleFrames.length; pose += 1) {
+        const at = paperStart + sparkle * sparkleStaggerMs + pose * sparkleFrameMs
+        timers.push(window.setTimeout(() => setSparkleFrame(current =>
+          current.map((value, index) => index === sparkle ? pose : value)), at))
+      }
+    }
+    timers.push(window.setTimeout(() => setPhase('revealed'), paperStart + paperRiseMs))
+    return () => timers.forEach(timer => window.clearTimeout(timer))
   }, [phase, reducedMotion])
 
   function draw() {
     if (phase !== 'ready') return
     const result = onDraw()
-    if (result !== 'unavailable') setPhase(result === 'created' ? 'drawing' : 'revealed')
+    if (result !== 'unavailable') {
+      setFrame(0)
+      setStage('shake')
+      setSparkleFrame([-1, -1, -1])
+      setFreshReveal(result === 'created')
+      setPhase(result === 'created' ? 'drawing' : 'revealed')
+    }
   }
 
   const foodIcon = pilotIcon(food)
@@ -80,20 +112,24 @@ export function DailyFortunePage({ fortune, food, drink, onDraw, onChoose }: {
 
     {phase !== 'revealed' && <div className="fortune-draw-scene" aria-live="polite">
       <div className="fortune-scene-art" aria-hidden="true">
-        <img src={sparkleFrames[frame % 3]} className="fortune-scene-sparkle fortune-scene-sparkle--left pixel-sprite" alt="" />
-        <img src={sparkleFrames[(frame + 1) % 3]} className="fortune-scene-sparkle fortune-scene-sparkle--right pixel-sprite" alt="" />
-        {phase === 'drawing' && <img src={fortunePaper} className="fortune-paper-pop pixel-sprite" alt="" />}
-        <img src={jarFrames[frame]} className="fortune-jar-sprite pixel-sprite" alt="" />
+        {phase === 'ready' && <>
+          <img src={sparkle01} className="fortune-scene-sparkle fortune-scene-sparkle--left pixel-sprite" alt="" />
+          <img src={sparkle03} className="fortune-scene-sparkle fortune-scene-sparkle--right pixel-sprite" alt="" />
+        </>}
+        {phase === 'drawing' && sparkleFrame.map((pose, index) => pose >= 0 &&
+          <img key={index} src={sparkleFrames[pose]} className={`fortune-scene-sparkle fortune-scene-sparkle--${['left', 'right', 'top'][index]} pixel-sprite`} alt="" />)}
+        {phase === 'drawing' && stage === 'paper' && <img src={fortunePaper} className="fortune-paper-pop pixel-sprite" alt="" />}
+        <img src={jarFrames[frame]} className={`fortune-jar-sprite pixel-sprite${stage === 'anticipate' && phase === 'drawing' ? ' fortune-jar-sprite--anticipate' : ''}`} alt="" />
       </div>
       <strong>{phase === 'drawing' ? '食运正在揭晓…' : '食运精灵已经准备好啦'}</strong>
       <p>{phase === 'drawing' ? '摇一摇，今天的美味就要出现啦。' : '每天只有一张，抽出后会为你保存到明天。'}</p>
       {phase === 'ready' && <PixelButton size="large" whileTap={{ y: 2 }} onClick={draw} className="fortune-draw-button">抽一签</PixelButton>}
     </div>}
 
-    {phase === 'revealed' && fortune && <div className="fortune-reveal" aria-live="polite">
+    {phase === 'revealed' && fortune && <div className={`fortune-reveal${freshReveal ? ' fortune-reveal--animated' : ''}`} aria-live="polite">
       <PixelCard className="fortune-card">
         <div className="fortune-card__top"><span>今日食运 · DAILY LUCK</span><span>NO. {fortune.date.replaceAll('-', '')}</span></div>
-        <div className="fortune-card__hero">
+        <div className="fortune-card__hero fortune-step fortune-step--verdict">
           <img src={fortunePaper} className="fortune-card__paper pixel-sprite" alt="" />
           <div className="fortune-card__verdict">
             <span className="fortune-card__eyebrow">今日签运</span>
@@ -103,12 +139,12 @@ export function DailyFortunePage({ fortune, food, drink, onDraw, onChoose }: {
           <img src={fortuneBadge} className="fortune-card__badge pixel-sprite" alt="" />
         </div>
         <div className="fortune-card__rule" aria-hidden="true"><img src={sparkle02} className="pixel-sprite" alt="" /></div>
-        <div className="fortune-card__label">今日宜</div>
-        <div className="fortune-tips">{fortune.luckyTags.map(tip => <span key={tip}>{tip}</span>)}</div>
-        <div className="fortune-luck-row"><span className="fortune-luck-row__label">幸运食物</span><strong><img src={foodIcon ?? sparkle01} className={foodIcon ? 'fortune-item-sprite pixel-sprite' : 'fortune-item-mark pixel-sprite'} alt="" />{food?.name ?? '菜单待补充'}</strong></div>
-        <div className="fortune-luck-row"><span className="fortune-luck-row__label">幸运饮品</span><strong><img src={drinkIcon ?? sparkle01} className={drinkIcon ? 'fortune-item-sprite pixel-sprite' : 'fortune-item-mark pixel-sprite'} alt="" />{drink?.name ?? '菜单待补充'}</strong></div>
-        <div className="fortune-luck-row"><span className="fortune-luck-row__label">幸运口味</span><strong>{fortune.luckyTaste}</strong></div>
-        <div className="fortune-card__message"><span>今日食语</span><p>“{fortune.message}”</p></div>
+        <div className="fortune-card__label fortune-step fortune-step--advice">今日宜</div>
+        <div className="fortune-tips fortune-step fortune-step--advice">{fortune.luckyTags.map(tip => <span key={tip}>{tip}</span>)}</div>
+        <div className="fortune-luck-row fortune-step fortune-step--food"><span className="fortune-luck-row__label">幸运食物</span><strong><img src={foodIcon ?? sparkle01} className={foodIcon ? 'fortune-item-sprite pixel-sprite' : 'fortune-item-mark pixel-sprite'} alt="" />{food?.name ?? '菜单待补充'}</strong></div>
+        <div className="fortune-luck-row fortune-step fortune-step--drink"><span className="fortune-luck-row__label">幸运饮品</span><strong><img src={drinkIcon ?? sparkle01} className={drinkIcon ? 'fortune-item-sprite pixel-sprite' : 'fortune-item-mark pixel-sprite'} alt="" />{drink?.name ?? '菜单待补充'}</strong></div>
+        <div className="fortune-luck-row fortune-step fortune-step--taste"><span className="fortune-luck-row__label">幸运口味</span><strong>{fortune.luckyTaste}</strong></div>
+        <div className="fortune-card__message fortune-step fortune-step--message"><span>今日食语</span><p>“{fortune.message}”</p></div>
         <div className="fortune-card__date">{fortune.date.replaceAll('-', '.')} · 今日食签已领取 ✓</div>
       </PixelCard>
       <div className="fortune-actions">

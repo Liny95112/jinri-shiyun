@@ -4,6 +4,7 @@ Run with Python 3.8+ and Pillow. Each sprite is drawn on its native pixel grid;
 the browser must display it at an integer scale with nearest-neighbor sampling.
 """
 
+import argparse
 from pathlib import Path
 from PIL import Image, ImageDraw
 
@@ -201,15 +202,28 @@ def coffee():
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Regenerate a locked-palette pixel asset")
+    parser.add_argument("--asset", help="Generate just one PNG (useful for one-at-a-time audits)")
+    args = parser.parse_args()
     # The palette and resolution checks above are re-applied before every save.
-    for name, sprite in (
+    fortune_assets = (
         ("fortune_jar_idle.png", jar()),
-        ("fortune_jar_shake_01.png", jar(-2, -1)),
-        ("fortune_jar_shake_02.png", jar(2, 1)),
+        ("fortune_jar_shake_01.png", jar(-1, -1)),
+        ("fortune_jar_shake_02.png", jar(-3, -2)),
         ("fortune_jar_shake_03.png", jar(0, -1)),
+        ("fortune_jar_shake_04.png", jar(3, 2)),
+        ("fortune_jar_shake_05.png", jar(1, 1)),
+        ("fortune_jar_shake_06.png", jar(0, 1)),
         ("fortune_paper.png", paper()),
         ("fortune_badge.png", badge()),
-    ):
+    )
+    if args.asset:
+        selected = next(((name, sprite) for name, sprite in fortune_assets if name == args.asset), None)
+        if selected is None:
+            parser.error(f"unknown fortune asset: {args.asset}")
+        selected[1].save("fortune", selected[0])
+        return
+    for name, sprite in fortune_assets:
         sprite.save("fortune", name)
     for index, radius in enumerate((1, 3, 2), 1):
         sparkle(radius).save("fx", f"sparkle_{index:02d}.png")

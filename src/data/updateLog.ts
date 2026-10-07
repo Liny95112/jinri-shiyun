@@ -7,6 +7,14 @@ export interface UpdateLogEntry {
 // Keep these entries in step with CHANGELOG.md; each published version announces itself once.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
+    version: '0.6.1', date: '2026-10-07',
+    sections: [{ title: '优化', items: [
+      '今日食签摇签升级为 6 张完整像素帧，并改为慢启动、快速摇动、自然减速。',
+      '增加签筒下压预备动作，签纸改为分段整数像素弹出。',
+      '三处星光依次闪现，食签结果按签运、今日宜、幸运吃喝、口味和食语逐段揭晓。'
+    ] }]
+  },
+  {
     version: '0.6.0', date: '2026-10-07',
     sections: [{ title: '像素画风升级', items: [
       '今日食签换上全新正式像素美术。',

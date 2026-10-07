@@ -24,9 +24,16 @@
 
 ## 目录
 
-- `fortune/`：签筒 4 帧、签纸、通用签运徽章。签筒每帧 64×64；签运文字由 HTML 显示。
+- `fortune/`：签筒待机帧与 6 张摇签帧、签纸、通用签运徽章。签筒每帧 64×64；签运文字由 HTML 显示。
 - `fx/`：16×16 闪光 3 帧。
 - `food/`：32×32 拉面、寿司样板。
 - `drink/`：32×32 奶茶、咖啡样板。
 
 运行 `python scripts/generate-pixel-fortune.py` 可复现这批 PNG；网页构建不需要 Python。后续扩充食品图标前，先沿用这套规格和色板。
+
+## 0.6.1 抽签帧与节奏
+
+- `fortune_jar_idle.png` 是中位；`fortune_jar_shake_01` / `02` 为轻左 / 深左，`03` 为中位签条摆动，`04` / `05` 为深右 / 轻右，`06` 为回中签条摆动。
+- 播放顺序与每姿势持续时间写在 `DailyFortunePage.tsx` 的 `shakeSequence`，总摇签时间 1,250ms；之后下压 2px 持续 80ms。
+- 签纸是原有 `fortune_paper.png`，用 430ms 的整数像素阶梯位移弹出；三处星光错开 85ms，各自切换现有 3 帧。
+- 可用 `python scripts/generate-pixel-fortune.py --asset fortune_jar_shake_04.png` 单独重制一张，再立即用 `pixel-art` Skill 审计。

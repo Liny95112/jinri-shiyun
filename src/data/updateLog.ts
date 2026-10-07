@@ -7,6 +7,15 @@ export interface UpdateLogEntry {
 // Keep these entries in step with CHANGELOG.md; each published version announces itself once.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
+    version: '0.6.0', date: '2026-10-07',
+    sections: [{ title: '像素画风升级', items: [
+      '今日食签换上全新正式像素美术。',
+      '新增像素签筒与抽签动画。',
+      '食签结果卡视觉升级。',
+      '开始建立统一的《今日食运》像素画风。'
+    ] }]
+  },
+  {
     version: '0.5.1', date: '2026-10-07',
     sections: [{ title: '优化', items: [
       '优化版本更新提示，仅在升级后首次打开时显示。',

@@ -15,7 +15,7 @@ import dexIcon from '../assets/pixel/home/icon_dex.png'
 export function HomePage({ onPick, onNavigate, onFortune }: { onPick: (kind: Kind) => void; onNavigate: (page: 'preferences' | 'history' | 'favorites' | 'dex') => void; onFortune: () => void }) {
   return <main className="page home-page">
     <div className="home-heading"><div className="eyebrow"><span className="dot" /> {getHomePeriodCopy()}</div><h1>今日食运<img src={sparkle} className="home-title-spark pixel-sprite" alt="" /></h1><p>今天别纠结啦，我帮你选。</p></div>
-    <div className="scene-wrap"><PixelScene /><div className="scene-caption">♡ 欢迎光临好运小食堂 ♡</div></div>
+    <div className="scene-wrap"><PixelScene /></div>
     <div className="choice-label"><span>今天的冒险从这里开始</span><span>↘</span></div>
     <div className="choice-stack grid">
       <PixelButton size="large" whileTap={{ y: 2 }} onClick={() => onPick('food')} className="home-choice home-choice--food"><span className="choice-icon"><img src={foodIcon} className="pixel-sprite" alt="" /></span><span><strong>今天吃什么</strong><small>好好吃饭，快乐加一</small></span><span className="choice-arrow">›</span></PixelButton>

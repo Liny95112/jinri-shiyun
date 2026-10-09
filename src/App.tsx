@@ -241,7 +241,7 @@ export default function App() {
 
   const todayFortune = getTodayFortune(state)
 
-  return <div className="app-shell"><header className="app-header flex items-center">{screen === 'home' ? <><div className="brand-mark">✦</div><span>好运小食堂</span><span className="header-badge">OPEN ♡</span></> : <><button className="back-button" onClick={goBack} aria-label="返回上一页">‹</button><span>{titles[screen]}</span><button className="home-button" onClick={goHome} aria-label="返回首页">⌂</button></>}</header>
+  return <div className={screen === "home" ? "app-shell app-shell--home" : "app-shell"}><header className="app-header flex items-center">{screen === 'home' ? <><div className="brand-mark">✦</div><span>好运小食堂</span><span className="header-badge">OPEN ♡</span></> : <><button className="back-button" onClick={goBack} aria-label="返回上一页">‹</button><span>{titles[screen]}</span><button className="home-button" onClick={goHome} aria-label="返回首页">⌂</button></>}</header>
     <AnimatePresence mode="wait"><motion.div key={`${screen}-${screen === 'rolling' || screen === 'dex-rolling' ? rollId : ''}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: .22 }} className="screen-wrap">
       {screen === 'home' && <HomePage onPick={chosen => { setKind(chosen); setScreen('picker') }} onNavigate={openHomeSection} onFortune={openFortune} />}
       {screen === 'fortune' && <DailyFortunePage fortune={todayFortune} food={foods.find(item => item.id === todayFortune?.foodId)} drink={drinks.find(item => item.id === todayFortune?.drinkId)} onDraw={drawFortune} onChoose={chooseFortuneItem} />}

@@ -1,29 +1,44 @@
-/* Home uses the locked pixel palette; v0.7.1 adds two-frame shop idles. */
+/* Home 0.7.2: cool night exterior, quieter surfaces, and exact-width sprite framing. */
+.app-shell--home{
+  --home-canvas:#FAFAF7;
+  --home-grid:#EBEDE9;
+  --home-card:#FFFEFA;
+  --home-panel:#F1F3F0;
+  --home-blue-card:#EAF1F3;
+  background:var(--home-canvas)
+}
+.app-shell--home:before{background:radial-gradient(#D8DCD8 1px,transparent 1px);opacity:.18}
+.app-shell--home .app-header{background:#F5F6F3;border-bottom-color:#9E897C}
+.app-shell--home .header-badge{background:#FFFEFA;border-color:#A58F81;color:#785D53}
+.app-shell--home .bottom-checker{background:repeating-linear-gradient(90deg,#BA8D79 0 12px,#F8F9F6 12px 24px)}
 .home-page{
   padding-bottom:calc(34px + env(safe-area-inset-bottom));
-  background-color:var(--pixel-cream);
-  background-image:linear-gradient(0deg,transparent 15px,var(--pixel-paper) 15px),
-    linear-gradient(90deg,transparent 15px,var(--pixel-paper) 15px);
+  background-color:var(--home-canvas);
+  background-image:linear-gradient(0deg,transparent 15px,var(--home-grid) 15px),
+    linear-gradient(90deg,transparent 15px,var(--home-grid) 15px);
   background-size:16px 16px;
 }
 .home-heading{text-align:center;margin:6px 0 13px}
 .home-heading .eyebrow{color:var(--pixel-wood)}
 .home-heading .dot{background:var(--pixel-matcha);box-shadow:2px 2px 0 var(--pixel-wood-dark)}
-.home-heading h1{display:flex;justify-content:center;align-items:flex-start;gap:5px;margin:9px 0 3px;color:var(--pixel-ink);font-size:44px;letter-spacing:.07em;text-shadow:2px 2px 0 var(--pixel-wood-light)}
+.home-heading h1{display:flex;justify-content:center;align-items:flex-start;gap:5px;margin:9px 0 3px;color:var(--pixel-ink);font-size:44px;letter-spacing:.07em;text-shadow:2px 2px 0 #D8D2C9}
 .home-title-spark{width:16px;height:16px;margin-top:6px}
 .home-heading p{margin:0;color:var(--pixel-wood);font-size:14px}
 
-.scene-wrap{position:relative;display:grid;place-items:center;border:4px solid var(--pixel-ink);box-shadow:4px 4px 0 var(--pixel-wood);background:var(--pixel-paper);overflow:hidden}
+/* Border box matches the 160x96 sprite at an exact 2x scale: 320 + 4px borders on both sides. */
+.scene-wrap{position:relative;display:grid;place-items:center;width:328px;max-width:100%;margin-inline:auto;border:4px solid var(--pixel-ink);box-shadow:4px 4px 0 #9A8C83;background:#E9EEF0;overflow:hidden}
 .pixel-scene{position:relative;display:block;width:320px;height:192px;flex:none;image-rendering:pixelated}
-.pixel-scene__frame{position:absolute;inset:0;display:block;width:100%;height:100%;image-rendering:pixelated}
-.pixel-scene__frame--idle{visibility:hidden;animation:home-shop-idle 3.2s steps(1,end) infinite}
-@keyframes home-shop-idle{
-  0%,48%{visibility:hidden}
-  50%,96%{visibility:visible}
-  100%{visibility:hidden}
-}
-@media(prefers-reduced-motion:reduce){.pixel-scene__frame--idle{animation:none;visibility:hidden}}
-.scene-caption{position:absolute;bottom:6px;left:6px;right:6px;width:max-content;max-width:calc(100% - 12px);margin:auto;padding:3px 8px;border:2px solid var(--pixel-wood-dark);background:var(--pixel-cream);color:var(--pixel-wood-dark);font-size:11px;font-weight:900;white-space:nowrap}
+.pixel-scene__frame{position:absolute;inset:0;display:block;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
+.pixel-scene__frame:not(:first-child){visibility:hidden;animation-duration:3.6s;animation-timing-function:steps(1,end);animation-iteration-count:infinite}
+.pixel-scene__frame--noren-left{animation-name:home-noren-left}
+.pixel-scene__frame--noren-right{animation-name:home-noren-right}
+.pixel-scene__frame--cat-tail{animation-name:home-cat-tail}
+.pixel-scene__frame--accent{animation-name:home-shop-accent}
+@keyframes home-noren-left{0%,9%,21%,100%{visibility:hidden}10%,20%{visibility:visible}}
+@keyframes home-noren-right{0%,21%,33%,100%{visibility:hidden}22%,32%{visibility:visible}}
+@keyframes home-cat-tail{0%,49%,64%,100%{visibility:hidden}50%,63%{visibility:visible}}
+@keyframes home-shop-accent{0%,80%,93%,100%{visibility:hidden}81%,92%{visibility:visible}}
+@media(prefers-reduced-motion:reduce){.pixel-scene__frame:not(:first-child){animation:none;visibility:hidden}}
 .choice-label{display:flex;align-items:center;justify-content:space-between;margin:17px 2px 9px;color:var(--pixel-wood);font-size:12px;font-weight:900;letter-spacing:.06em}
 .choice-label span:last-child{color:var(--pixel-orange);font-size:20px;line-height:1}
 .choice-stack{display:grid;gap:12px}
@@ -39,7 +54,7 @@
 .home-choice small{display:block;margin-top:4px;font-size:11px;font-weight:700;letter-spacing:0;line-height:1.3}
 .choice-arrow{margin-left:auto;font:900 32px/1 Consolas,monospace}
 
-.fortune-home-entry,.dex-home-entry{display:flex;align-items:center;gap:11px;width:100%;min-height:62px;padding:9px 13px;text-align:left;border:2px solid var(--pixel-ink);box-shadow:4px 4px 0 var(--pixel-wood);background:var(--pixel-paper);color:var(--pixel-ink);touch-action:manipulation}
+.fortune-home-entry,.dex-home-entry{display:flex;align-items:center;gap:11px;width:100%;min-height:62px;padding:9px 13px;text-align:left;border:2px solid var(--pixel-ink);box-shadow:4px 4px 0 var(--pixel-wood);background:var(--home-card);color:var(--pixel-ink);touch-action:manipulation}
 .fortune-home-entry{margin-top:15px}
 .fortune-home-entry:active,.dex-home-entry:active{transform:translateY(2px);box-shadow:2px 2px 0 var(--pixel-wood)}
 .fortune-entry-icon{display:grid;place-items:center;flex:none;width:44px;height:44px;border:2px solid var(--pixel-wood);background:var(--pixel-cream)}
@@ -49,13 +64,13 @@
 .fortune-home-entry small{color:var(--pixel-wood);font-size:11px}
 .fortune-entry-spark{width:16px;height:16px;margin-left:auto}
 
-.home-shortcuts{margin-top:23px;padding:17px 12px 12px;border:2px solid var(--pixel-ink);box-shadow:4px 4px 0 var(--pixel-wood-light);background:var(--pixel-paper)}
-.shortcuts-title{position:absolute;top:-12px;left:12px;padding:2px 8px;border:2px solid var(--pixel-wood);background:var(--pixel-cream);color:var(--pixel-wood-dark);font-size:11px;font-weight:900}
+.home-shortcuts{margin-top:23px;padding:17px 12px 12px;border:2px solid var(--pixel-ink);box-shadow:4px 4px 0 #D4D8D1;background:var(--home-panel)}
+.shortcuts-title{position:absolute;top:-12px;left:12px;padding:2px 8px;border:2px solid var(--pixel-wood);background:var(--home-panel);color:var(--pixel-wood-dark);font-size:11px;font-weight:900}
 .shortcuts-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-.shortcuts-grid button{display:grid;justify-items:center;align-content:center;gap:5px;min-width:0;min-height:67px;padding:5px 1px;border:2px solid var(--pixel-wood-light);box-shadow:2px 2px 0 var(--pixel-paper-shadow);background:var(--pixel-cream);color:var(--pixel-ink);font-size:11px;font-weight:900;white-space:nowrap;touch-action:manipulation}
+.shortcuts-grid button{display:grid;justify-items:center;align-content:center;gap:5px;min-width:0;min-height:67px;padding:5px 1px;border:2px solid var(--pixel-wood-light);box-shadow:2px 2px 0 var(--pixel-paper-shadow);background:var(--home-card);color:var(--pixel-ink);font-size:11px;font-weight:900;white-space:nowrap;touch-action:manipulation}
 .shortcuts-grid button:active{transform:translateY(2px);box-shadow:none}
 .shortcut-icon{width:32px;height:32px}
-.dex-home-entry{margin-top:13px;min-height:58px}
+.dex-home-entry{margin-top:13px;min-height:58px;background:var(--home-blue-card)}
 .dex-entry-icon{width:32px;height:32px;flex:none}
 .dex-home-entry strong{font-size:15px}
 .dex-home-entry small{margin-left:auto;color:var(--pixel-wood);font-size:11px}
@@ -63,10 +78,13 @@
 .home-footer{margin:20px 0 3px;text-align:center;color:var(--pixel-wood);font-size:11px;letter-spacing:.04em}
 .home-version{display:block;text-align:center;color:var(--pixel-wood);font-size:10px}
 
+/* At 355px and below the content area cannot fit 328px; use exact 1x with its own matching frame. */
+@media(max-width:355px){
+  .scene-wrap{width:168px}
+  .pixel-scene{width:160px;height:96px}
+}
 @media(max-width:360px){
   .home-heading h1{font-size:38px}
-  .scene-wrap{padding:7px 0}
-  .pixel-scene{width:160px;height:96px}
   .home-page .home-choice{gap:9px;padding:9px 10px}
   .home-choice strong{font-size:16px}
   .home-choice small{font-size:10px}

@@ -6,6 +6,7 @@ import { drinks, foods } from './data/items'
 import { fortuneDateKey, generateDailyFortune, getTodayFortune, repairDailyFortune } from './lib/dailyFortune'
 import { addTodayRejectedItem, cleanupExpiredTodayRejectedItems, loadState, preferenceKeys, saveState } from './lib/storage'
 import { HomeNotices, type HomeNotice } from './components/HomeNotices'
+import { shouldShowUpdatePopup } from './data/updateLog'
 import { HomePage } from './pages/HomePage'
 import { PickerPage } from './pages/PickerPage'
 import { RollingPage } from './pages/RollingPage'
@@ -45,7 +46,15 @@ export default function App() {
   useEffect(() => {
     if (screen !== 'home' || homeNotice || pauseFortuneNotice) return
     if (state.lastSeenVersion !== APP_VERSION) {
-      setHomeNotice('update')
+      if (shouldShowUpdatePopup(APP_VERSION, state.lastSeenVersion)) {
+        setHomeNotice('update')
+      } else {
+        // Quiet releases still advance the existing version marker. Fortune
+        // reminder eligibility is checked on the next state-driven pass.
+        const next = { ...state, lastSeenVersion: APP_VERSION }
+        saveState(next)
+        setState(next)
+      }
       return
     }
     const today = fortuneDateKey()

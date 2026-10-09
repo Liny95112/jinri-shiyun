@@ -1,20 +1,33 @@
 export interface UpdateLogEntry {
   version: string
   date: string
+  showPopup?: boolean
   sections: { title: string; items: string[] }[]
 }
 
-// Keep these entries in step with CHANGELOG.md; each published version announces itself once.
+// Keep entries in step with CHANGELOG.md. Only showPopup: true announces an upgrade.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
-    version: '0.7.3', date: '2026-10-09',
+    version: '0.7.4', date: '2026-10-09', showPopup: false,
+    sections: [
+      { title: '修复', items: [
+        '修复首页小猫走路时轮廓不完整的问题，左右走路改为四帧像素动作。',
+        '待机帧改为完整图片交替显示。'
+      ] },
+      { title: '优化', items: [
+        '小型修复版本不再自动弹出更新公告。'
+      ] }
+    ]
+  },
+  {
+    version: '0.7.3', date: '2026-10-09', showPopup: false,
     sections: [{ title: '优化', items: [
       '首页小猫会在小食堂门前偶尔散步，在左、中、右三个位置停留。',
       '小猫换上独立的像素走路帧；减少动态效果时保持安静。'
     ] }]
   },
   {
-    version: '0.7.2', date: '2026-10-09',
+    version: '0.7.2', date: '2026-10-09', showPopup: true,
     sections: [
       { title: '首页氛围升级', items: [
         '早晨、白天与夜晚的小食堂更有各自的光线和颜色；夜晚变成外冷内暖的深蓝街景。',
@@ -26,14 +39,14 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ]
   },
   {
-    version: '0.7.1', date: '2026-10-07',
+    version: '0.7.1', date: '2026-10-07', showPopup: true,
     sections: [{ title: '首页氛围升级', items: [
       '首页小食堂会根据本地时间展示早晨、白天或夜晚的像素风景。',
       '小店门帘加入轻量待机动作，夜晚的灯笼也会温柔亮起来。'
     ] }]
   },
   {
-    version: '0.7.0', date: '2026-10-07',
+    version: '0.7.0', date: '2026-10-07', showPopup: true,
     sections: [{ title: '像素画风升级', items: [
       '首页小食堂换上正式像素美术。',
       '吃什么、喝什么入口重新设计，按钮和图标更像像素小游戏。',
@@ -42,7 +55,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.6.1', date: '2026-10-07',
+    version: '0.6.1', date: '2026-10-07', showPopup: false,
     sections: [{ title: '优化', items: [
       '今日食签摇签升级为 6 张完整像素帧，并改为慢启动、快速摇动、自然减速。',
       '增加签筒下压预备动作，签纸改为分段整数像素弹出。',
@@ -50,7 +63,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.6.0', date: '2026-10-07',
+    version: '0.6.0', date: '2026-10-07', showPopup: true,
     sections: [{ title: '像素画风升级', items: [
       '今日食签换上全新正式像素美术。',
       '新增像素签筒与抽签动画。',
@@ -59,7 +72,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.5.1', date: '2026-10-07',
+    version: '0.5.1', date: '2026-10-07', showPopup: false,
     sections: [{ title: '优化', items: [
       '优化版本更新提示，仅在升级后首次打开时显示。',
       '更新公告不再常驻首页。',
@@ -67,7 +80,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.5.0', date: '2026-10-07',
+    version: '0.5.0', date: '2026-10-07', showPopup: true,
     sections: [
       { title: '新增', items: [
         '新增每日「今日食签」提醒。',
@@ -81,14 +94,14 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ]
   },
   {
-    version: '0.4.1', date: '2026-10-06',
+    version: '0.4.1', date: '2026-10-06', showPopup: false,
     sections: [{ title: '修复', items: [
       '修复进入“美食图鉴”时可能继承上一页面滚动位置、停留在页面中部或底部的问题。',
       '修复进入“我的喜好”时可能继承上一页面滚动位置的问题。'
     ] }]
   },
   {
-    version: '0.4.0', date: '2026-10-06',
+    version: '0.4.0', date: '2026-10-06', showPopup: true,
     sections: [{ title: '新增', items: [
       '新增像素风「今日食签」，每天按设备本地日期领取一张固定食签，并提供轻量抽签揭晓动画。',
       '新增大吉、中吉、小吉、吉、平五种正向签运，以及幸运食物、饮品、口味、今日宜和今日食语。',
@@ -97,7 +110,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.3.1', date: '2026-10-06',
+    version: '0.3.1', date: '2026-10-06', showPopup: false,
     sections: [{ title: '优化', items: [
       '完善“今天吃什么”的心情选项，加入压力大、没胃口、嘴馋了、随便啦，并将“想吃好的”整理为“犒劳自己”。',
       '根据现有类别、口味、预算、心情和标签细化不同心情的推荐权重；“随便啦”不施加心情权重。',
@@ -105,7 +118,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.3.0', date: '2026-10-05',
+    version: '0.3.0', date: '2026-10-05', showPopup: true,
     sections: [{ title: '新增与优化', items: [
       '新增按设备本地时间段调整权重的智能推荐，并在首页与结果页显示轻量提示。',
       '根据最近吃喝记录自动降权，并在当前抽取会话中降低重复结果概率。',
@@ -115,7 +128,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.2.0', date: '2026-10-05',
+    version: '0.2.0', date: '2026-10-05', showPopup: true,
     sections: [{ title: '新增', items: [
       '新增美食图鉴，直接展示现有全部食品与饮品。',
       '支持名称实时搜索、按现有分类和标签筛选，并显示当前结果数量。',
@@ -124,7 +137,7 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   },
   {
-    version: '0.1.0', date: '2026-10-05',
+    version: '0.1.0', date: '2026-10-05', showPopup: false,
     sections: [{ title: '基础版本', items: [
       '建立统一应用版本号，并在首页底部显示。',
       '当前测试版包含吃喝筛选、抽取推荐、喜好、历史、收藏和 PWA 离线访问。',
@@ -132,3 +145,8 @@ export const UPDATE_LOG: UpdateLogEntry[] = [
     ] }]
   }
 ]
+
+/** Only explicitly highlighted releases may open an update notice. */
+export function shouldShowUpdatePopup(version: string, lastSeenVersion?: string, entries: readonly UpdateLogEntry[] = UPDATE_LOG): boolean {
+  return lastSeenVersion !== version && entries.some(entry => entry.version === version && entry.showPopup === true)
+}

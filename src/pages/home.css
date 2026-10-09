@@ -36,12 +36,10 @@
 .pixel-scene__frame--accent{animation-name:home-shop-accent}
 .pixel-scene__cat{position:absolute;top:68px;width:24px;height:24px;pointer-events:none;image-rendering:pixelated}
 .pixel-scene__cat img{position:absolute;inset:0;display:block;width:24px;height:24px;image-rendering:pixelated}
-.pixel-scene__cat-tail{visibility:hidden;animation:home-cat-tail 3.6s steps(1,end) infinite}
-@keyframes home-cat-tail{0%,49%,64%,100%{visibility:hidden}50%,63%{visibility:visible}}
 @keyframes home-noren-left{0%,9%,21%,100%{visibility:hidden}10%,20%{visibility:visible}}
 @keyframes home-noren-right{0%,21%,33%,100%{visibility:hidden}22%,32%{visibility:visible}}
 @keyframes home-shop-accent{0%,80%,93%,100%{visibility:hidden}81%,92%{visibility:visible}}
-@media(prefers-reduced-motion:reduce){.pixel-scene__frame:not(:first-child),.pixel-scene__cat-tail{animation:none;visibility:hidden}}
+@media(prefers-reduced-motion:reduce){.pixel-scene__frame:not(:first-child){animation:none;visibility:hidden}}
 .choice-label{display:flex;align-items:center;justify-content:space-between;margin:17px 2px 9px;color:var(--pixel-wood);font-size:12px;font-weight:900;letter-spacing:.06em}
 .choice-label span:last-child{color:var(--pixel-orange);font-size:20px;line-height:1}
 .choice-stack{display:grid;gap:12px}

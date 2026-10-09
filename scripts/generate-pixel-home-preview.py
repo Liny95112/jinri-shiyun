@@ -195,38 +195,56 @@ def cat_idle(period, tail=False):
 
 
 def cat_walk(period, frame, direction):
-    """Three deliberate ground-contact poses; horizontal flip is pixel-exact."""
-    assert frame in (1, 2, 3) and direction in ("left", "right")
+    """Four compact side-profile poses with one connected cat silhouette."""
+    assert frame in (1, 2, 3, 4) and direction in ("left", "right")
     sprite = shared["Sprite"](24)
     fur = "cream" if period == "night" else "wood_light"
     light = "gold" if period == "night" else "cream"
-    sprite.rect((18, 11, 22, 14 + (frame == 2)), "ink")
-    sprite.rect((20, 12, 21, 13 + (frame == 2)), fur)
-    sprite.rect((9, 10, 19, 18), "ink")
-    sprite.rect((10, 11, 18, 16), fur)
-    sprite.rect((12, 11, 18, 12), light)
-    sprite.rect((7, 15, 17, 18), fur)
-    sprite.rect((5, 8, 12, 16), "ink")
-    sprite.rect((4, 5, 12, 12), "ink")
-    sprite.draw.polygon([(4, 6), (5, 2), (8, 5)], fill=P["ink"])
-    sprite.draw.polygon([(9, 5), (12, 2), (12, 7)], fill=P["ink"])
-    sprite.rect((5, 6, 11, 10), fur)
-    sprite.rect((10, 6, 11, 7), light)
-    sprite.rect((2, 9, 5, 11), fur)
-    sprite.rect((7, 8, 7, 9), "ink")
-    sprite.rect((2, 11, 3, 11), "red")
-    if frame == 1:
-        legs = ((7, 19, 9, 22), (16, 18, 18, 21))
-    elif frame == 2:
-        legs = ((5, 18, 8, 20), (16, 19, 20, 22))
-    else:
-        legs = ((8, 19, 11, 22), (15, 18, 17, 20))
-    for leg in legs:
-        sprite.rect(leg, "ink")
-        sprite.rect((leg[0], leg[1], leg[2], leg[1] + 1), fur)
+    rise = 1 if frame in (2, 4) else 0
+    top = lambda y: y - rise
+
+    # Draw a continuous dark silhouette first. Every tail and leg overlaps
+    # the torso by at least two native pixels; no floating components.
+    sprite.rect((18, top(11), 21, top(15)), "ink")
+    sprite.rect((20, top(8), 22, top(12)), "ink")
+    steps = {
+        1: ((8, 22), (11, 20), (16, 22), (19, 20)),
+        2: ((7, 21), (11, 22), (16, 21), (19, 22)),
+        3: ((8, 20), (11, 22), (16, 20), (19, 22)),
+        4: ((7, 22), (11, 21), (16, 22), (19, 21)),
+    }
+    for x, foot in steps[frame]:
+        sprite.rect((x, top(16), x + 2, foot), "ink")
+    sprite.rect((8, top(10), 19, top(18)), "ink")
+    sprite.rect((6, top(9), 12, top(16)), "ink")
+    sprite.rect((4, top(5), 12, top(12)), "ink")
+    sprite.draw.polygon([(4, top(7)), (5, top(2)), (8, top(5))], fill=P["ink"])
+    sprite.draw.polygon([(9, top(5)), (12, top(2)), (12, top(7))], fill=P["ink"])
+    sprite.rect((2, top(9), 5, top(11)), "ink")
+
+    # Interior shading stays inside the silhouette. Paws remain attached and
+    # touch the same y=22 pavement line in every pose.
+    sprite.rect((10, top(11), 18, top(16)), fur)
+    sprite.rect((9, top(16), 17, top(17)), fur)
+    sprite.rect((6, top(6), 11, top(10)), fur)
+    sprite.rect((3, top(9), 5, top(10)), fur)
+    sprite.rect((19, top(11), 20, top(13)), fur)
+    for x, foot in steps[frame]:
+        if foot == 22:
+            sprite.rect((x + 1, 19, x + 1, 20), fur)
+    sprite.rect((7, top(8), 7, top(9)), "ink")
+    sprite.rect((2, top(10), 3, top(10)), "red")
+
     if direction == "right":
+        # Flip exact opaque pixels, then place the top-right highlight anew so
+        # the scene's shared right-side light is not reversed.
         sprite.image = sprite.image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
         sprite.draw = ImageDraw.Draw(sprite.image)
+        sprite.rect((15, top(7), 17, top(7)), light)
+        sprite.rect((8, top(11), 11, top(11)), light)
+    else:
+        sprite.rect((9, top(7), 11, top(7)), light)
+        sprite.rect((15, top(11), 18, top(11)), light)
     return sprite
 
 
@@ -239,7 +257,7 @@ CAT_ASSETS = {
     **{f"home_cat_{period}_idle_{frame:02d}.png": (period, "idle", frame, None)
        for period in PERIODS for frame in (1, 2)},
     **{f"home_cat_{period}_walk_{direction}_{frame:02d}.png": (period, "walk", frame, direction)
-       for period in PERIODS for direction in ("left", "right") for frame in (1, 2, 3)},
+       for period in PERIODS for direction in ("left", "right") for frame in (1, 2, 3, 4)},
 }
 
 

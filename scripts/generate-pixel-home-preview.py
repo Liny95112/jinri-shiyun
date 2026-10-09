@@ -1,7 +1,8 @@
 """Create 0.7.2 candidate shop frames without replacing published 0.7.1 art.
 
 Each 160x96 RGBA PNG is a complete hard-edged frame. Reuse the locked 16-color
-palette and draw one named frame at a time, then run pixel-art quality_audit.
+palette where possible. The night preview adds three cold exterior colors to
+contrast with the existing warm interior. Draw and audit one frame at a time.
 """
 
 import argparse
@@ -14,6 +15,18 @@ from PIL import ImageDraw
 shared = runpy.run_path(str(Path(__file__).with_name("generate-pixel-home.py")))
 P = shared["P"]
 shop = shared["shop"]
+
+# Preview-only palette extension. The release sprites and shared palette are
+# untouched; each output frame still uses no more than 16 opaque colors.
+NIGHT_COLORS = {
+    "night_sky": "#293B57",
+    "night_mid": "#455E7B",
+    "night_street": "#71889B",
+}
+P.update(NIGHT_COLORS)
+shared["Sprite"].save.__globals__["ALLOWED"].update(
+    tuple(bytes.fromhex(value[1:])) for value in NIGHT_COLORS.values()
+)
 
 PERIODS = ("morning", "day", "night")
 POSES = ("preview", "noren_left", "noren_right", "cat_tail", "accent")
@@ -79,6 +92,42 @@ def draw_noren(scene, pose):
     scene.rect((98, 40, 99, max(hems[1], hems[2])), "ink")
 
 
+def cool_night_exterior(scene):
+    """Cool only the outside; window, lantern, sign and doorway stay warm."""
+    ImageDraw.floodfill(scene.image, (0, 0), rgba("night_sky"))
+    ImageDraw.floodfill(scene.image, (0, 90), rgba("night_street"))
+    pixels = scene.image.load()
+    for y in range(96):
+        for x in range(160):
+            color = pixels[x, y]
+            if 18 <= y <= 32 and 19 <= x <= 142:
+                # Roof and top exterior catch a little cold moonlight.
+                if color == rgba("wood_dark"):
+                    pixels[x, y] = rgba("night_sky")
+                elif color == rgba("wood"):
+                    pixels[x, y] = rgba("night_mid")
+                elif color == rgba("wood_light"):
+                    pixels[x, y] = rgba("night_street")
+            elif 27 <= y <= 73 and (25 <= x <= 35 or 111 <= x <= 138):
+                if color == rgba("wood_light"):
+                    pixels[x, y] = rgba("night_mid")
+                elif color in (rgba("wood"), rgba("wood_dark")):
+                    pixels[x, y] = rgba("night_sky")
+            elif y >= 78 and color == rgba("paper_shadow"):
+                pixels[x, y] = rgba("night_mid")
+
+    # Blue horizon and pavement edging remain behind the shop and the cat.
+    scene.rect((0, 60, 18, 74), "night_mid")
+    scene.rect((143, 59, 159, 74), "night_mid")
+    scene.rect((0, 71, 18, 74), "night_street")
+    scene.rect((143, 70, 159, 74), "night_street")
+    scene.rect((0, 75, 21, 77), "night_mid")
+    scene.rect((140, 75, 159, 77), "night_mid")
+    # Sparse crisp stars support the indigo sky.
+    scene.rect((10, 15, 11, 16), "ice_light")
+    scene.rect((147, 31, 148, 32), "ice_light")
+
+
 def make_frame(period, pose):
     assert period in PERIODS and pose in POSES
     # Use the original 0.7.1 drawing as the geometry source. All new colors
@@ -101,16 +150,18 @@ def make_frame(period, pose):
         scene.rect((29, 28, 36, 29), "paper")
         scene.rect((131, 29, 134, 40), "wood_light")
     else:
+        cool_night_exterior(scene)
         scene.rect((145, 7, 153, 18), "paper")
         scene.rect((147, 5, 151, 7), "paper")
         scene.rect((147, 18, 153, 19), "paper")
-        scene.rect((150, 7, 157, 15), "wood_dark")  # pixel crescent moon
+        scene.rect((150, 7, 157, 15), "night_sky")  # pixel crescent moon
         scene.rect((39, 38, 40, 58), "gold")
         scene.rect((41, 39, 62, 41), "cream")
         scene.rect((64, 39, 67, 57), "paper")
         scene.rect((83, 53, 100, 55), "gold")
-        scene.rect((93, 79, 123, 80), "orange")
-        scene.rect((107, 83, 131, 84), "wood_light")
+        scene.rect((83, 77, 111, 78), "orange")
+        scene.rect((89, 79, 107, 80), "gold")
+        scene.rect((94, 82, 106, 83), "wood_light")
 
     draw_noren(scene, pose)
     draw_cat(scene, period, tail=pose == "cat_tail")

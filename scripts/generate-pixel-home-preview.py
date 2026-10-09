@@ -1,4 +1,4 @@
-"""Create 0.7.2 candidate shop frames without replacing published 0.7.1 art.
+"""Generate 0.7.3 shop frames and independent strolling cat sprites.
 
 Each 160x96 RGBA PNG is a complete hard-edged frame. Reuse the locked 16-color
 palette where possible. The night preview adds three cold exterior colors to
@@ -9,7 +9,7 @@ import argparse
 import runpy
 from pathlib import Path
 
-from PIL import ImageDraw
+from PIL import Image, ImageDraw
 
 
 shared = runpy.run_path(str(Path(__file__).with_name("generate-pixel-home.py")))
@@ -29,7 +29,7 @@ shared["Sprite"].save.__globals__["ALLOWED"].update(
 )
 
 PERIODS = ("morning", "day", "night")
-POSES = ("preview", "noren_left", "noren_right", "cat_tail", "accent")
+POSES = ("preview", "noren_left", "noren_right", "accent")
 
 
 def rgba(name):
@@ -164,7 +164,6 @@ def make_frame(period, pose):
         scene.rect((94, 82, 106, 83), "wood_light")
 
     draw_noren(scene, pose)
-    draw_cat(scene, period, tail=pose == "cat_tail")
 
     if pose == "accent":
         if period == "morning":
@@ -185,18 +184,76 @@ def make_frame(period, pose):
     return scene
 
 
+def cat_idle(period, tail=False):
+    """Crop the original seated cat exactly, on a transparent 24x24 grid."""
+    canvas = shared["Canvas"](160, 96)
+    draw_cat(canvas, period, tail=tail)
+    sprite = shared["Sprite"](24)
+    sprite.image = canvas.image.crop((122, 68, 146, 92))
+    sprite.draw = ImageDraw.Draw(sprite.image)
+    return sprite
+
+
+def cat_walk(period, frame, direction):
+    """Three deliberate ground-contact poses; horizontal flip is pixel-exact."""
+    assert frame in (1, 2, 3) and direction in ("left", "right")
+    sprite = shared["Sprite"](24)
+    fur = "cream" if period == "night" else "wood_light"
+    light = "gold" if period == "night" else "cream"
+    sprite.rect((18, 11, 22, 14 + (frame == 2)), "ink")
+    sprite.rect((20, 12, 21, 13 + (frame == 2)), fur)
+    sprite.rect((9, 10, 19, 18), "ink")
+    sprite.rect((10, 11, 18, 16), fur)
+    sprite.rect((12, 11, 18, 12), light)
+    sprite.rect((7, 15, 17, 18), fur)
+    sprite.rect((5, 8, 12, 16), "ink")
+    sprite.rect((4, 5, 12, 12), "ink")
+    sprite.draw.polygon([(4, 6), (5, 2), (8, 5)], fill=P["ink"])
+    sprite.draw.polygon([(9, 5), (12, 2), (12, 7)], fill=P["ink"])
+    sprite.rect((5, 6, 11, 10), fur)
+    sprite.rect((10, 6, 11, 7), light)
+    sprite.rect((2, 9, 5, 11), fur)
+    sprite.rect((7, 8, 7, 9), "ink")
+    sprite.rect((2, 11, 3, 11), "red")
+    if frame == 1:
+        legs = ((7, 19, 9, 22), (16, 18, 18, 21))
+    elif frame == 2:
+        legs = ((5, 18, 8, 20), (16, 19, 20, 22))
+    else:
+        legs = ((8, 19, 11, 22), (15, 18, 17, 20))
+    for leg in legs:
+        sprite.rect(leg, "ink")
+        sprite.rect((leg[0], leg[1], leg[2], leg[1] + 1), fur)
+    if direction == "right":
+        sprite.image = sprite.image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+        sprite.draw = ImageDraw.Draw(sprite.image)
+    return sprite
+
+
 ASSETS = {
     f"home_shop_{period}_{pose}.png": (period, pose)
     for period in PERIODS for pose in POSES
 }
 
+CAT_ASSETS = {
+    **{f"home_cat_{period}_idle_{frame:02d}.png": (period, "idle", frame, None)
+       for period in PERIODS for frame in (1, 2)},
+    **{f"home_cat_{period}_walk_{direction}_{frame:02d}.png": (period, "walk", frame, direction)
+       for period in PERIODS for direction in ("left", "right") for frame in (1, 2, 3)},
+}
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate one 0.7.2 preview shop frame")
-    parser.add_argument("--asset", required=True, choices=ASSETS)
+    parser = argparse.ArgumentParser(description="Generate one home scene or cat sprite")
+    parser.add_argument("--asset", required=True, choices=tuple(ASSETS) + tuple(CAT_ASSETS))
     name = parser.parse_args().asset
-    period, pose = ASSETS[name]
-    make_frame(period, pose).save("home/preview", name, max_colors=16)
+    if name in ASSETS:
+        period, pose = ASSETS[name]
+        make_frame(period, pose).save("home/preview", name, max_colors=16)
+    else:
+        period, action, frame, direction = CAT_ASSETS[name]
+        sprite = cat_idle(period, tail=frame == 2) if action == "idle" else cat_walk(period, frame, direction)
+        sprite.save("home/cat", name, max_colors=8)
 
 
 if __name__ == "__main__":

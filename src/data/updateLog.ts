@@ -7,6 +7,13 @@ export interface UpdateLogEntry {
 // Keep these entries in step with CHANGELOG.md; each published version announces itself once.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
+    version: '0.7.3', date: '2026-10-09',
+    sections: [{ title: '优化', items: [
+      '首页小猫会在小食堂门前偶尔散步，在左、中、右三个位置停留。',
+      '小猫换上独立的像素走路帧；减少动态效果时保持安静。'
+    ] }]
+  },
+  {
     version: '0.7.2', date: '2026-10-09',
     sections: [
       { title: '首页氛围升级', items: [

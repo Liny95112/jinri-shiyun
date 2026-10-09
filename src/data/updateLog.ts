@@ -8,6 +8,12 @@ export interface UpdateLogEntry {
 // Keep entries in step with CHANGELOG.md. Only showPopup: true announces an upgrade.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
+    version: '0.7.5', date: '2026-10-09', showPopup: false,
+    sections: [{ title: '新增', items: [
+      '接入匿名网站访问与核心功能使用统计。'
+    ] }]
+  },
+  {
     version: '0.7.4', date: '2026-10-09', showPopup: false,
     sections: [
       { title: '修复', items: [

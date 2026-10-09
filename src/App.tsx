@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { APP_VERSION } from './config'
+import { trackEvent, trackPageView } from './lib/analytics'
 import { pickRecommendation } from './lib/recommend'
 import { drinks, foods } from './data/items'
 import { fortuneDateKey, generateDailyFortune, getTodayFortune, repairDailyFortune } from './lib/dailyFortune'
@@ -22,6 +23,21 @@ import type { DrinkFilters, FoodFilters, Item, Kind, PickResult, SavedState } fr
 type Screen = 'home' | 'picker' | 'rolling' | 'result' | 'preferences' | 'history' | 'favorites' | 'dex' | 'dex-rolling' | 'dex-result' | 'fortune'
 type PreferenceKey = 'likedFood' | 'dislikedFood' | 'likedDrink' | 'dislikedDrink'
 
+function analyticsPage(screen: Screen, kind: Kind): { path: string; title: string } | null {
+  switch (screen) {
+    case 'home': return { path: '/home', title: '今日食运' }
+    case 'picker': return { path: kind === 'food' ? '/food-picker' : '/drink-picker', title: kind === 'food' ? '今天吃什么' : '今天喝什么' }
+    case 'result': return { path: kind === 'food' ? '/food-result' : '/drink-result', title: '今日推荐' }
+    case 'dex': return { path: '/dex', title: '美食图鉴' }
+    case 'dex-result': return { path: '/dex-result', title: '图鉴揭晓' }
+    case 'preferences': return { path: '/preferences', title: '我的喜好' }
+    case 'history': return { path: '/history', title: '最近吃喝' }
+    case 'favorites': return { path: '/favorites', title: '收藏结果' }
+    case 'fortune': return { path: '/daily-fortune', title: '今日食签' }
+    default: return null // Rolling screens are transitions, not destinations.
+  }
+}
+
 export default function App() {
   const [state, setState] = useState<SavedState>(loadState)
   const [screen, setScreen] = useState<Screen>('home')
@@ -40,6 +56,10 @@ export default function App() {
   const recentDraws = useRef<string[]>([])
   const noticeTimer = useRef<number | null>(null)
 
+  useEffect(() => {
+    const page = analyticsPage(screen, kind)
+    if (page) trackPageView(page.path, page.title)
+  }, [screen, kind])
   useEffect(() => saveState(state), [state])
   useEffect(() => { if (!toast) return; const id = window.setTimeout(() => setToast(''), 3200); return () => window.clearTimeout(id) }, [toast])
   useEffect(() => () => { if (noticeTimer.current !== null) window.clearTimeout(noticeTimer.current) }, [])
@@ -95,11 +115,12 @@ export default function App() {
 
   function openHomeSection(page: 'preferences' | 'history' | 'favorites' | 'dex') {
     recentDraws.current = []
-    if (page === 'dex') { setDexKind('food'); setDexQuery(''); setDexFilter('all') }
+    if (page === 'dex') { setDexKind('food'); setDexQuery(''); setDexFilter('all'); trackEvent('dex_open') }
     setScreen(page)
   }
 
   function openFortune() {
+    trackEvent('daily_fortune_open')
     recentDraws.current = []
     const now = new Date()
     const saved = loadState()
@@ -126,6 +147,7 @@ export default function App() {
     const next = { ...cleaned, dailyFortune: fortune, lastShown }
     saveState(next) // Save before the reveal animation, so a refresh still shows this exact sign.
     setState(next)
+    trackEvent('daily_fortune_draw')
     return 'created'
   }
 
@@ -205,6 +227,10 @@ export default function App() {
       }
     })
     setAccepted(true)
+    trackEvent(item.kind === 'food' ? 'food_result_confirm' : 'drink_result_confirm', {
+      item_type: item.kind, item_id: item.id,
+      source: screen === 'dex-result' ? 'dex' : resultSource
+    })
   }
 
   function reject(reason: RejectReason) {
@@ -252,7 +278,7 @@ export default function App() {
 
   return <div className={screen === "home" ? "app-shell app-shell--home" : "app-shell"}><header className="app-header flex items-center">{screen === 'home' ? <><div className="brand-mark">✦</div><span>好运小食堂</span><span className="header-badge">OPEN ♡</span></> : <><button className="back-button" onClick={goBack} aria-label="返回上一页">‹</button><span>{titles[screen]}</span><button className="home-button" onClick={goHome} aria-label="返回首页">⌂</button></>}</header>
     <AnimatePresence mode="wait"><motion.div key={`${screen}-${screen === 'rolling' || screen === 'dex-rolling' ? rollId : ''}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: .22 }} className="screen-wrap">
-      {screen === 'home' && <HomePage onPick={chosen => { setKind(chosen); setScreen('picker') }} onNavigate={openHomeSection} onFortune={openFortune} />}
+      {screen === 'home' && <HomePage onPick={chosen => { trackEvent(chosen === 'food' ? 'food_picker_open' : 'drink_picker_open'); setKind(chosen); setScreen('picker') }} onNavigate={openHomeSection} onFortune={openFortune} />}
       {screen === 'fortune' && <DailyFortunePage fortune={todayFortune} food={foods.find(item => item.id === todayFortune?.foodId)} drink={drinks.find(item => item.id === todayFortune?.drinkId)} onDraw={drawFortune} onChoose={chooseFortuneItem} />}
       {screen === 'picker' && <PickerPage kind={kind} state={state} onChange={updateFilters} onStart={() => startRoll()} />}
       {screen === 'rolling' && result && <RollingPage kind={kind} result={result} onComplete={() => setScreen('result')} />}

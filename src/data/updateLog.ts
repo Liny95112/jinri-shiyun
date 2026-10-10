@@ -8,6 +8,15 @@ export interface UpdateLogEntry {
 // Keep entries in step with CHANGELOG.md. Only showPopup: true announces an upgrade.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
+    version: '0.8.0', date: '2026-10-10', showPopup: true,
+    sections: [{ title: '今日菜单大扩容', items: [
+      '新增大量日常美食、早点、小吃与甜品。',
+      '增加更多咖啡、奶茶、果茶和传统饮品。',
+      '加入霸王茶姬、星巴克、瑞幸、喜茶等常见品牌的代表选择。',
+      '美食图鉴现在能翻到更多好吃好喝的啦。'
+    ] }]
+  },
+  {
     version: '0.7.5', date: '2026-10-09', showPopup: false,
     sections: [{ title: '新增', items: [
       '接入匿名网站访问与核心功能使用统计。'

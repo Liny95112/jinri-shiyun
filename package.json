@@ -1,13 +1,14 @@
 {
   "name": "jinri-shiyun",
   "private": true,
-  "version": "0.8.1",
+  "version": "0.8.2",
   "type": "module",
   "scripts": {
     "dev": "vite --configLoader runner --host 0.0.0.0",
     "start": "tsc -b && vite build --configLoader runner && vite preview --configLoader runner --host 0.0.0.0",
     "build": "tsc -b && vite build --configLoader runner",
-    "preview": "vite preview --configLoader runner --host 0.0.0.0"
+    "preview": "vite preview --configLoader runner --host 0.0.0.0",
+    "test:recommend": "node scripts/test-recommend-regression.cjs && node scripts/test-recommend-repeat.cjs --assert"
   },
   "dependencies": {
     "framer-motion": "^12.23.22",

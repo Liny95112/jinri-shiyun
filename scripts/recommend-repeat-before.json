@@ -1,0 +1,156 @@
+{
+  "food-default-session": {
+    "pool": 281,
+    "mode": "session",
+    "draws": 1000,
+    "adjacentPct": 0,
+    "recent5Pct": 0.4,
+    "history24Pct": 0,
+    "coverage": 268,
+    "top10Pct": 8.7,
+    "nulls": 0
+  },
+  "drink-default-session": {
+    "pool": 154,
+    "mode": "session",
+    "draws": 1000,
+    "adjacentPct": 0,
+    "recent5Pct": 0.7,
+    "history24Pct": 0,
+    "coverage": 154,
+    "top10Pct": 11.4,
+    "nulls": 0
+  },
+  "food-independent": {
+    "pool": 281,
+    "mode": "independent",
+    "draws": 1000,
+    "adjacentPct": 0.2,
+    "recent5Pct": 1.3,
+    "history24Pct": 0,
+    "coverage": 271,
+    "top10Pct": 8.5,
+    "nulls": 0
+  },
+  "drink-independent": {
+    "pool": 154,
+    "mode": "independent",
+    "draws": 1000,
+    "adjacentPct": 0.3,
+    "recent5Pct": 2.5,
+    "history24Pct": 0,
+    "coverage": 154,
+    "top10Pct": 11.9,
+    "nulls": 0
+  },
+  "food-many-likes": {
+    "pool": 281,
+    "mode": "session",
+    "draws": 1000,
+    "adjacentPct": 0,
+    "recent5Pct": 1.4,
+    "history24Pct": 0,
+    "coverage": 265,
+    "top10Pct": 9.2,
+    "nulls": 0
+  },
+  "drink-many-likes": {
+    "pool": 154,
+    "mode": "session",
+    "draws": 1000,
+    "adjacentPct": 0,
+    "recent5Pct": 1,
+    "history24Pct": 0,
+    "coverage": 153,
+    "top10Pct": 11.3,
+    "nulls": 0
+  },
+  "food-history-independent": {
+    "pool": 281,
+    "mode": "independent",
+    "draws": 1000,
+    "adjacentPct": 0.1,
+    "recent5Pct": 1,
+    "history24Pct": 3.4,
+    "coverage": 263,
+    "top10Pct": 8.7,
+    "nulls": 0
+  },
+  "drink-history-independent": {
+    "pool": 154,
+    "mode": "independent",
+    "draws": 1000,
+    "adjacentPct": 0.7,
+    "recent5Pct": 2.6,
+    "history24Pct": 4.1,
+    "coverage": 152,
+    "top10Pct": 11.9,
+    "nulls": 0
+  },
+  "food-small-1": {
+    "pool": 1,
+    "mode": "session",
+    "draws": 1000,
+    "adjacentPct": 99.9,
+    "recent5Pct": 99.9,
+    "history24Pct": 0,
+    "coverage": 1,
+    "top10Pct": 100,
+    "nulls": 0
+  },
+  "food-small-3": {
+    "pool": 3,
+    "mode": "session",
+    "draws": 1000,
+    "adjacentPct": 0,
+    "recent5Pct": 95.7,
+    "history24Pct": 0,
+    "coverage": 3,
+    "top10Pct": 100,
+    "nulls": 0
+  },
+  "drink-small-5": {
+    "pool": 5,
+    "mode": "session",
+    "draws": 1000,
+    "adjacentPct": 0,
+    "recent5Pct": 66.3,
+    "history24Pct": 0,
+    "coverage": 5,
+    "top10Pct": 100,
+    "nulls": 0
+  },
+  "food-filtered-lunch": {
+    "pool": 53,
+    "mode": "session",
+    "draws": 1000,
+    "adjacentPct": 0,
+    "recent5Pct": 2.9,
+    "history24Pct": 0,
+    "coverage": 53,
+    "top10Pct": 27.9,
+    "nulls": 0
+  },
+  "drink-filtered": {
+    "pool": 27,
+    "mode": "session",
+    "draws": 1000,
+    "adjacentPct": 0,
+    "recent5Pct": 8.1,
+    "history24Pct": 0,
+    "coverage": 27,
+    "top10Pct": 42.2,
+    "nulls": 0
+  },
+  "dex-food-8": {
+    "pool": 8,
+    "mode": "session",
+    "draws": 1000,
+    "adjacentPct": 0,
+    "recent5Pct": 38.1,
+    "history24Pct": 0,
+    "coverage": 8,
+    "top10Pct": 100,
+    "nulls": 0
+  }
+}

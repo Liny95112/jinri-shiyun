@@ -53,7 +53,7 @@ export default function App() {
   const [dexPool, setDexPool] = useState<Item[]>([])
   const [homeNotice, setHomeNotice] = useState<HomeNotice>(null)
   const [pauseFortuneNotice, setPauseFortuneNotice] = useState(false)
-  const recentDraws = useRef<string[]>([])
+  const recentDraws = useRef<Record<Kind, string[]>>({ food: [], drink: [] })
   const noticeTimer = useRef<number | null>(null)
 
   useEffect(() => {
@@ -104,9 +104,8 @@ export default function App() {
     setHomeNotice(null)
   }
 
-  function goHome() { recentDraws.current = []; setScreen('home'); setResult(null); setAccepted(false) }
+  function goHome() { setScreen('home'); setResult(null); setAccepted(false) }
   function goBack() {
-    recentDraws.current = []
     if (screen === 'result') setScreen(resultSource === 'fortune' ? 'fortune' : 'picker')
     else if (screen === 'rolling') setScreen('picker')
     else if (screen === 'dex-result' || screen === 'dex-rolling') setScreen('dex')
@@ -114,14 +113,12 @@ export default function App() {
   }
 
   function openHomeSection(page: 'preferences' | 'history' | 'favorites' | 'dex') {
-    recentDraws.current = []
     if (page === 'dex') { setDexKind('food'); setDexQuery(''); setDexFilter('all'); trackEvent('dex_open') }
     setScreen(page)
   }
 
   function openFortune() {
     trackEvent('daily_fortune_open')
-    recentDraws.current = []
     const now = new Date()
     const saved = loadState()
     const existing = getTodayFortune(saved, now)
@@ -168,16 +165,15 @@ export default function App() {
   function changeDexKind(next: Kind) { setDexKind(next); setDexQuery(''); setDexFilter('all') }
 
   function rememberDraw(currentState: SavedState, item: Item, now: Date): SavedState {
-    recentDraws.current = [item.id, ...recentDraws.current.filter(id => id !== item.id)].slice(0, 5)
+    recentDraws.current[item.kind] = [item.id, ...recentDraws.current[item.kind].filter(id => id !== item.id)].slice(0, 5)
     return { ...currentState, lastShown: [{ id: item.id, timestamp: now.getTime() }, ...currentState.lastShown.filter(entry => entry.id !== item.id)].slice(0, 100) }
   }
 
   function startDexDraw(items: Item[], excludeId?: string) {
     if (!items.length) return
-    if (!excludeId) recentDraws.current = []
     const now = new Date()
     const currentState = cleanupExpiredTodayRejectedItems(state, now)
-    const options = { pool: items, excludeId, recentDraws: recentDraws.current, usePickerFilters: false, now }
+    const options = { pool: items, excludeId, recentDraws: recentDraws.current[items[0].kind], usePickerFilters: false, now }
     let picked = pickRecommendation(items[0].kind, currentState, options)
     if (!picked && excludeId) picked = pickRecommendation(items[0].kind, currentState, { ...options, excludeId: undefined })
     if (!picked) { setState(currentState); setToast('当前条件下没有合适的选项，试试放宽筛选吧。'); return }
@@ -196,10 +192,9 @@ export default function App() {
   }
 
   function startRoll(chosenKind = kind, currentState = state, excludeId?: string) {
-    if (!excludeId) recentDraws.current = []
     const now = new Date()
     const cleanedState = cleanupExpiredTodayRejectedItems(currentState, now)
-    const options = { excludeId, recentDraws: recentDraws.current, now }
+    const options = { excludeId, recentDraws: recentDraws.current[chosenKind], now }
     let picked = pickRecommendation(chosenKind, cleanedState, options)
     // A tiny catalog can be exhausted by repeat requests; allow the previous result again as a last resort.
     if (!picked && excludeId) picked = pickRecommendation(chosenKind, cleanedState, { ...options, excludeId: undefined })
@@ -288,7 +283,7 @@ export default function App() {
       {screen === 'favorites' && <FavoritesPage state={state} onRemove={toggleFavorite} onChoose={chooseFavorite} />}
       {screen === 'dex' && <DexPage kind={dexKind} query={dexQuery} filterKey={dexFilter} state={state} onKindChange={changeDexKind} onQueryChange={setDexQuery} onFilterChange={setDexFilter} onFavorite={toggleFavorite} onPreference={changeDexPreference} onDraw={items => startDexDraw(items)} />}
       {screen === 'dex-rolling' && result && <RollingPage kind={result.item.kind} result={result} options={dexPool} onComplete={() => setScreen('dex-result')} />}
-      {screen === 'dex-result' && result && <DexResultPage result={result} accepted={accepted} onAccept={accept} onReroll={() => startDexDraw(dexPool, result.item.id)} onBack={() => { recentDraws.current = []; setScreen('dex') }} />}
+      {screen === 'dex-result' && result && <DexResultPage result={result} accepted={accepted} onAccept={accept} onReroll={() => startDexDraw(dexPool, result.item.id)} onBack={() => setScreen('dex')} />}
     </motion.div></AnimatePresence>
     <HomeNotices notice={homeNotice} onClose={closeHomeNotice} onOpenFortune={() => { closeHomeNotice(); openFortune() }} />
     <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="toast" role="status">{toast}</motion.div>}</AnimatePresence>

@@ -242,6 +242,32 @@ export function pickRecommendation(kind: Kind, state: SavedState, options: Recom
   let level = 0
   let candidates = usePickerFilters ? allowed.filter(item => match(item, level)) : allowed
   while (usePickerFilters && !candidates.length && level < 2) candidates = allowed.filter(item => match(item, ++level))
+  // Picker and dex draws pass recentDraws; the daily fortune does not. Keep
+  // explicit filters first, then prefer new choices when that pool permits it.
+  if (options.recentDraws && candidates.length > 1) {
+    const candidateIds = new Set(candidates.map(item => item.id))
+    const recentIds = new Set(options.recentDraws.filter(id => candidateIds.has(id)).slice(0, 5))
+    // lastShown survives navigation and reloads. Fill the five-slot memory
+    // from this kind's eligible items, without extending it beyond 24 hours.
+    for (const shown of state.lastShown) {
+      if (recentIds.size >= 5) break
+      if (candidateIds.has(shown.id) && shown.timestamp <= now.getTime()
+        && now.getTime() - shown.timestamp < 86400000) recentIds.add(shown.id)
+    }
+    const notRecentlyShown = candidates.filter(item => !recentIds.has(item.id))
+    if (notRecentlyShown.length) candidates = notRecentlyShown
+
+    // Confirmed choices get their existing score penalty in small pools. In
+    // larger pools, first try items not confirmed in the past 24 hours.
+    if (candidates.length >= 6) {
+      const confirmedToday = new Set(state.history
+        .filter(entry => entry.kind === kind && entry.timestamp <= now.getTime()
+          && now.getTime() - entry.timestamp < 86400000)
+        .map(entry => entry.itemId))
+      const notConfirmedToday = candidates.filter(item => !confirmedToday.has(item.id))
+      if (notConfirmedToday.length) candidates = notConfirmedToday
+    }
+  }
   const weights = candidates.map(item => scoreRecommendation(item, state, { ...options, now }).final)
   if (import.meta.env?.DEV) {
     console.debug('[今日食运] 推荐候选', candidates.map((item, index) => ({ name: item.name, score: Math.round(weights[index] * 10) / 10 }))

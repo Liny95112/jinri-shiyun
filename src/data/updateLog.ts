@@ -8,6 +8,12 @@ export interface UpdateLogEntry {
 // Keep entries in step with CHANGELOG.md. Only showPopup: true announces an upgrade.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
+    version: '0.8.2', date: '2026-10-11', showPopup: false,
+    sections: [{ title: '修复', items: [
+      '减少刚抽过或刚确认吃喝的选项再次出现，候选较少时仍能正常抽取。'
+    ] }]
+  },
+  {
     version: '0.8.1', date: '2026-10-10', showPopup: false,
     sections: [{ title: '新增', items: [
       '饮品池新增霸王茶姬「白雾红尘」与「青青糯山」。'

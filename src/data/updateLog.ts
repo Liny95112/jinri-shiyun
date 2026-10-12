@@ -8,6 +8,15 @@ export interface UpdateLogEntry {
 // Keep entries in step with CHANGELOG.md. Only showPopup: true announces an upgrade.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
+    version: '0.9.0', date: '2026-10-12', showPopup: true,
+    sections: [{ title: '像素小食堂 · 今日上菜 🍜', items: [
+      '今日推荐页面焕新，像素美食正式登场！',
+      '新增餐点上桌、热气与星光动画。',
+      '优化抽取节奏，换一个更加快捷。',
+      '食物与饮品的揭晓过程更有仪式感。'
+    ] }]
+  },
+  {
     version: '0.8.3', date: '2026-10-12', showPopup: false,
     sections: [{ title: '优化', items: [
       '今日食签抽取后，首页直接展示当天签运及幸运吃喝。',

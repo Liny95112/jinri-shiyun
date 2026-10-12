@@ -8,6 +8,13 @@ export interface UpdateLogEntry {
 // Keep entries in step with CHANGELOG.md. Only showPopup: true announces an upgrade.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
+    version: '0.8.3', date: '2026-10-12', showPopup: false,
+    sections: [{ title: '优化', items: [
+      '今日食签抽取后，首页直接展示当天签运及幸运吃喝。',
+      '可从首页查看完整食签，跨天后自动恢复未领取状态。'
+    ] }]
+  },
+  {
     version: '0.8.2', date: '2026-10-11', showPopup: false,
     sections: [{ title: '修复', items: [
       '减少刚抽过或刚确认吃喝的选项再次出现，候选较少时仍能正常抽取。'

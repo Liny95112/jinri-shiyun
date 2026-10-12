@@ -53,6 +53,7 @@ export default function App() {
   const [dexPool, setDexPool] = useState<Item[]>([])
   const [homeNotice, setHomeNotice] = useState<HomeNotice>(null)
   const [pauseFortuneNotice, setPauseFortuneNotice] = useState(false)
+  const [localDay, setLocalDay] = useState(fortuneDateKey)
   const recentDraws = useRef<Record<Kind, string[]>>({ food: [], drink: [] })
   const noticeTimer = useRef<number | null>(null)
 
@@ -63,6 +64,38 @@ export default function App() {
   useEffect(() => saveState(state), [state])
   useEffect(() => { if (!toast) return; const id = window.setTimeout(() => setToast(''), 3200); return () => window.clearTimeout(id) }, [toast])
   useEffect(() => () => { if (noticeTimer.current !== null) window.clearTimeout(noticeTimer.current) }, [])
+  useEffect(() => {
+    let midnightTimer: number
+    const checkDay = () => setLocalDay(current => {
+      const today = fortuneDateKey()
+      return current === today ? current : today
+    })
+    const scheduleMidnight = () => {
+      window.clearTimeout(midnightTimer)
+      const now = new Date()
+      const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+      midnightTimer = window.setTimeout(() => { checkDay(); scheduleMidnight() }, nextMidnight.getTime() - now.getTime() + 100)
+    }
+    const resume = () => { checkDay(); scheduleMidnight() }
+    const onVisibility = () => { if (!document.hidden) resume() }
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('focus', resume)
+    window.addEventListener('pageshow', resume)
+    scheduleMidnight()
+    return () => {
+      window.clearTimeout(midnightTimer)
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('focus', resume)
+      window.removeEventListener('pageshow', resume)
+    }
+  }, [])
+  useEffect(() => {
+    if (screen !== 'home') return
+    const current = getTodayFortune(state)
+    if (!current) return
+    const repaired = repairDailyFortune(current, state)
+    if (repaired !== current) setState(saved => saved.dailyFortune === current ? { ...saved, dailyFortune: repaired } : saved)
+  }, [screen, localDay, state])
   useEffect(() => {
     if (screen !== 'home' || homeNotice || pauseFortuneNotice) return
     if (state.lastSeenVersion !== APP_VERSION) {
@@ -77,7 +110,7 @@ export default function App() {
       }
       return
     }
-    const today = fortuneDateKey()
+    const today = localDay
     if (!getTodayFortune(state) && state.fortuneReminder?.lastShownDate !== today) {
       // Persist on display, so refreshing or reopening the PWA cannot show it twice today.
       const next = { ...state, fortuneReminder: { lastShownDate: today } }
@@ -85,7 +118,7 @@ export default function App() {
       setState(next)
       setHomeNotice('fortune')
     }
-  }, [screen, homeNotice, pauseFortuneNotice, state])
+  }, [screen, homeNotice, pauseFortuneNotice, state, localDay])
 
   function markVersionSeen() {
     if (state.lastSeenVersion === APP_VERSION) return
@@ -273,7 +306,7 @@ export default function App() {
 
   return <div className={screen === "home" ? "app-shell app-shell--home" : "app-shell"}><header className="app-header flex items-center">{screen === 'home' ? <><div className="brand-mark">✦</div><span>好运小食堂</span><span className="header-badge">OPEN ♡</span></> : <><button className="back-button" onClick={goBack} aria-label="返回上一页">‹</button><span>{titles[screen]}</span><button className="home-button" onClick={goHome} aria-label="返回首页">⌂</button></>}</header>
     <AnimatePresence mode="wait"><motion.div key={`${screen}-${screen === 'rolling' || screen === 'dex-rolling' ? rollId : ''}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: .22 }} className="screen-wrap">
-      {screen === 'home' && <HomePage onPick={chosen => { trackEvent(chosen === 'food' ? 'food_picker_open' : 'drink_picker_open'); setKind(chosen); setScreen('picker') }} onNavigate={openHomeSection} onFortune={openFortune} />}
+      {screen === 'home' && <HomePage onPick={chosen => { trackEvent(chosen === 'food' ? 'food_picker_open' : 'drink_picker_open'); setKind(chosen); setScreen('picker') }} onNavigate={openHomeSection} onFortune={openFortune} fortune={todayFortune} fortuneFood={foods.find(item => item.id === todayFortune?.foodId)} fortuneDrink={drinks.find(item => item.id === todayFortune?.drinkId)} />}
       {screen === 'fortune' && <DailyFortunePage fortune={todayFortune} food={foods.find(item => item.id === todayFortune?.foodId)} drink={drinks.find(item => item.id === todayFortune?.drinkId)} onDraw={drawFortune} onChoose={chooseFortuneItem} />}
       {screen === 'picker' && <PickerPage kind={kind} state={state} onChange={updateFilters} onStart={() => startRoll()} />}
       {screen === 'rolling' && result && <RollingPage kind={kind} result={result} onComplete={() => setScreen('result')} />}

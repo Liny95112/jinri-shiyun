@@ -64,6 +64,16 @@
 .fortune-home-entry strong{font-size:16px}
 .fortune-home-entry small{color:var(--pixel-wood);font-size:11px}
 .fortune-entry-spark{width:16px;height:16px;margin-left:auto}
+.fortune-home-entry--claimed{align-items:flex-start;padding-top:12px;padding-bottom:12px}
+.fortune-home-entry--claimed .fortune-entry-icon{margin-top:1px}
+.fortune-entry-summary{flex:1;min-width:0}
+.fortune-entry-heading{display:flex;align-items:center;flex-wrap:wrap;gap:6px 9px}
+.fortune-entry-level{padding:2px 7px;border:2px solid var(--pixel-red);background:var(--pixel-paper);color:var(--pixel-red);font-size:11px;font-weight:900;line-height:1.2;white-space:nowrap}
+.fortune-entry-item{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:start;gap:6px;margin-top:5px;font-size:11px;line-height:1.45}
+.fortune-entry-item>span{color:var(--pixel-wood);white-space:nowrap}
+.fortune-entry-item b{min-width:0;font-weight:800;overflow-wrap:anywhere}
+.fortune-entry-link{margin-top:8px;color:var(--pixel-red);font-size:11px;font-weight:900}
+.fortune-entry-link span{font-size:16px;line-height:10px}
 
 .home-shortcuts{margin-top:23px;padding:17px 12px 12px;border:2px solid var(--pixel-ink);box-shadow:4px 4px 0 #D4D8D1;background:var(--home-panel)}
 .shortcuts-title{position:absolute;top:-12px;left:12px;padding:2px 8px;border:2px solid var(--pixel-wood);background:var(--home-panel);color:var(--pixel-wood-dark);font-size:11px;font-weight:900}

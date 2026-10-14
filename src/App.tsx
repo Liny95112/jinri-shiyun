@@ -241,8 +241,8 @@ export default function App() {
     setAccepted(false)
     setQuickResult(Boolean(excludeId))
     setRollId(id => id + 1)
-    // A reroll reuses the normal recommendation path but reveals the next dish in place.
-    setScreen(excludeId ? 'result' : 'rolling')
+    // A reroll reuses the normal recommendation path and plays the short machine reveal.
+    setScreen('rolling')
   }
 
   function accept() {
@@ -313,7 +313,7 @@ export default function App() {
       {screen === 'home' && <HomePage onPick={chosen => { trackEvent(chosen === 'food' ? 'food_picker_open' : 'drink_picker_open'); setKind(chosen); setScreen('picker') }} onNavigate={openHomeSection} onFortune={openFortune} fortune={todayFortune} fortuneFood={foods.find(item => item.id === todayFortune?.foodId)} fortuneDrink={drinks.find(item => item.id === todayFortune?.drinkId)} />}
       {screen === 'fortune' && <DailyFortunePage fortune={todayFortune} food={foods.find(item => item.id === todayFortune?.foodId)} drink={drinks.find(item => item.id === todayFortune?.drinkId)} onDraw={drawFortune} onChoose={chooseFortuneItem} />}
       {screen === 'picker' && <PickerPage kind={kind} state={state} onChange={updateFilters} onStart={() => startRoll()} />}
-      {screen === 'rolling' && result && <RollingPage kind={kind} result={result} servingReveal onComplete={() => setScreen('result')} />}
+      {screen === 'rolling' && result && <RollingPage kind={kind} result={result} servingReveal quick={quickResult} onComplete={() => setScreen('result')} />}
       {screen === 'result' && result && <ResultPage key={result.item.id} kind={kind} quickReveal={quickResult} result={result} favorite={state.favorites.includes(result.item.id)} accepted={accepted} onAccept={accept} onReroll={() => startRoll(kind, state, result.item.id)} onReject={reject} onFavorite={() => toggleFavorite(result.item.id)} onHome={resultSource === 'fortune' ? openFortune : goHome} fortuneMode={resultSource === 'fortune'} />}
       {screen === 'preferences' && <PreferencesPage state={state} onChange={changePreference} />}
       {screen === 'history' && <HistoryPage state={state} />}

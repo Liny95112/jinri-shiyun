@@ -1,0 +1,34 @@
+.rolling-page--machine{padding-top:30px;text-align:center;min-height:calc(100dvh - 72px)}
+.rolling-page--machine h1{margin:8px 0 6px;font-size:29px}
+.rolling-page--machine .machine-intro{margin:0;color:var(--pixel-wood);font-size:13px}
+.machine-stage{width:288px;height:262px;position:relative;margin:24px auto 0;image-rendering:pixelated;isolation:isolate}
+.machine-stage img{image-rendering:pixelated;object-fit:contain}
+.machine-body{position:absolute;left:0;top:0;width:256px;height:256px;z-index:1}
+.machine-sign{position:absolute;z-index:4;left:54px;top:31px;width:148px;text-align:center;color:var(--pixel-ink);font-size:15px;font-weight:1000;letter-spacing:2px;line-height:24px;white-space:nowrap}
+.machine-reels{position:absolute;inset:0;z-index:2;pointer-events:none}
+.machine-reel{position:absolute;top:82px;width:48px;height:82px;overflow:hidden;background:var(--pixel-paper)}
+.machine-reel--1{left:36px}.machine-reel--2{left:104px}.machine-reel--3{left:172px}
+.machine-reel::before{content:"";position:absolute;z-index:0;left:0;right:0;top:19px;height:44px;background:var(--pixel-cream)}
+.machine-reel__strip{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;transform:translateY(-25px);width:48px;will-change:transform}
+.machine-reel__strip--spinning{animation:machine-reel-scroll var(--reel-speed) steps(var(--reel-steps),end) infinite}
+.machine-stage--slowing .machine-reel__strip--spinning{animation-duration:480ms}
+.machine-reel__cell{flex:none;width:48px;height:44px;display:grid;place-items:center}
+.machine-reel__cell img{display:block;width:32px;height:32px;image-rendering:pixelated}
+@keyframes machine-reel-scroll{from{transform:translateY(-25px)}to{transform:translateY(calc(-25px - var(--reel-distance)))}}
+.machine-menu-corners{position:absolute;z-index:4;left:32px;top:103px;width:4px;height:4px;background:var(--pixel-gold);box-shadow:188px 0 0 var(--pixel-gold),0 38px 0 var(--pixel-gold),188px 38px 0 var(--pixel-gold);pointer-events:none}
+.machine-stage--hit .machine-menu-corners{background:var(--pixel-matcha);box-shadow:188px 0 0 var(--pixel-matcha),0 38px 0 var(--pixel-matcha),188px 38px 0 var(--pixel-matcha)}
+.machine-stage--hit .machine-reel__strip{animation:machine-menu-bounce 400ms steps(1,end) 1}
+@keyframes machine-menu-bounce{0%,32%,66%,100%{transform:translateY(-25px)}15%,49%{transform:translateY(-27px)}}
+.machine-light{position:absolute;z-index:4;top:6px;width:32px;height:32px}.machine-light--left{left:22px}.machine-light--right{left:202px}
+.machine-lever{position:absolute;z-index:5;left:222px;top:77px;width:64px;height:64px;border:0;background:none;padding:0;box-shadow:none;touch-action:manipulation}
+.machine-lever img{display:block;width:64px;height:64px}.machine-lever:disabled{cursor:default}.machine-lever:not(:disabled):active{transform:translateY(2px)}
+.machine-stage--pull .machine-body,.machine-stage--return .machine-body{animation:machine-nudge 160ms steps(1,end) 1}
+.machine-stage--paused *{animation-play-state:paused!important}
+@keyframes machine-nudge{0%,100%{transform:translateX(0)}35%{transform:translateX(-2px)}70%{transform:translateX(2px)}}
+.machine-sparkles{position:absolute;z-index:5;left:25px;top:66px;width:202px;pointer-events:none}.machine-sparkles img{position:absolute;width:32px;height:32px;image-rendering:pixelated}.machine-sparkles img:first-child{left:0;top:12px}.machine-sparkles img:last-child{right:0;top:0}
+.machine-current{max-width:280px;min-height:32px;margin:0 auto!important;color:var(--pixel-ink)!important;font-size:20px!important;font-weight:900;overflow-wrap:anywhere;line-height:1.45}
+.machine-note{margin:4px auto 12px!important;color:var(--pixel-wood)!important;font-size:13px!important}
+.machine-pull-button{display:block;margin:15px auto 0;min-height:48px;padding:9px 22px;border:3px solid var(--pixel-ink);background:var(--pixel-red);color:var(--pixel-cream);box-shadow:4px 4px 0 var(--pixel-wood);font-weight:900;font-size:15px}
+.machine-pull-button:active{transform:translateY(2px);box-shadow:2px 2px 0 var(--pixel-wood)}
+@media (prefers-reduced-motion:reduce){.machine-stage *{animation:none!important;transition:none!important}}
+@media (max-width:360px){.rolling-page--machine{padding-left:14px;padding-right:14px}.machine-stage{margin-top:17px}}

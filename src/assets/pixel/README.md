@@ -106,3 +106,11 @@
 - 结果页首次的装饰完整揭晓约 1.1 秒，约 0.78 秒可操作；连续换一个约 0.88 秒完整揭晓，约 0.58 秒可操作。
 - 星光只演一次；热气保留两次缓慢帧循环后停止；点击确认的餐点落定和星光反馈约 0.4 秒。减少动态效果时直接静态展示。
 - 新餐盘由 `python scripts/generate-result-fx.py --asset tray` 逐张生成，并用 pixel-art Skill 审计。
+
+## 0.9.1 今日点单机
+
+- `machine/food_three_reel_machine.png`：128×128 木质三栏主体，顶部食物小图案与侧边菜单牌；页面按 2× 最近邻显示。
+- `machine/machine_lever_idle.png`、`machine_lever_pull.png`、`machine_lever_return.png`：各 32×32，拉杆待机、下拉、弹回完整帧，按 2× 显示。
+- `machine/machine_light_01.png`、`machine_light_02.png`：各 16×16，抽取期间交替点亮，按 2× 显示。
+- 三个滚轮沿用现有食品和饮品像素图标；左、中、右依次停下，最后停在推荐算法已选定项目对应的同一图案。中排以奶白底色与四角像素角饰高亮，不使用横向中奖线。
+- 第三栏停下后三个图案轻跳两次，灯光与星光短暂反馈。素材使用现有共享色板，可用 `python scripts/generate-pixel-machine.py` 复现并审计。

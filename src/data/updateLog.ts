@@ -8,6 +8,14 @@ export interface UpdateLogEntry {
 // Keep entries in step with CHANGELOG.md. Only showPopup: true announces an upgrade.
 export const UPDATE_LOG: UpdateLogEntry[] = [
   {
+    version: '0.10.0', date: '2026-10-18', showPopup: true,
+    sections: [{ title: '饮品菜单大扩容', items: [
+      '饮品库新增 190 款，去重后共有 344 款可以挑。',
+      '奶茶、咖啡、果饮、气泡和暖心饮品都有更多选择。',
+      '加入更多真实品牌代表饮品，今天喝什么更有新鲜感。'
+    ] }]
+  },
+  {
     version: '0.9.1', date: '2026-10-14', showPopup: false,
     sections: [{ title: '优化', items: [
       '今日点单机换上小食堂风格的三栏抽取演出。',
